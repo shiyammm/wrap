@@ -21,9 +21,9 @@ export async function GET(request: Request) {
             );
         }
         return NextResponse.json({ role: user.role });
-    } catch (e: any) {
+    } catch (err) {
         return NextResponse.json(
-            { error: e.message || "Something went wrong" },
+            { error : err || "Something went wrong" },
             { status: 500 }
         );
     }
