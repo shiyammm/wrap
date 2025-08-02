@@ -122,13 +122,8 @@ export default function ProductDetails({
 
     return (
         <div className="grid w-full max-w-4xl grid-cols-1 gap-12 rounded-lg md:grid-cols-2">
-            <div className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-teal-50 to-cyan-50 p-5 dark:from-teal-950/30 dark:to-cyan-950/30">
-                {isOnSale && (
-                    <span className="absolute top-4 left-4 z-10 rounded-full bg-gradient-to-r from-pink-500 to-red-500 px-3 py-1.5 text-xs font-bold text-white">
-                        Sale
-                    </span>
-                )}
-                <ProductThumbnail images={images} />
+            <div className="relative w-full overflow-hidden rounded-2xl p-5 dark:from-teal-950/30 dark:to-cyan-950/30">
+                <ProductThumbnail images={images} isOnSale={isOnSale} />
 
                 {/* <Image width={400} height={600} alt={name} src={images[0]} /> */}
             </div>
