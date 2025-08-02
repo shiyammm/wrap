@@ -18,8 +18,17 @@ import { createCategory, getCategories } from "@/lib/actions/seller.action";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Category } from "@/prisma/generated";
+import { ControllerRenderProps } from "react-hook-form";
+import { productSchema } from "@/lib/validation";
+import z from "zod";
 
-export const CategorySelect = ({ field }: any) => {
+type ProductFormValues = z.infer<typeof productSchema>;
+
+type Props = {
+    field: ControllerRenderProps<ProductFormValues, "category">;
+};
+
+export const CategorySelect = ({ field }: Props) => {
     const [open, setOpen] = useState(false);
     const [newCategory, setNewCategory] = useState("");
     const [categories, setCategories] = useState<Category[]>([]);
