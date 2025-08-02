@@ -8,7 +8,7 @@ export default function Hero() {
                 <div className="container mx-auto px-4 py-24 md:px-6 lg:py-32 2xl:max-w-[1400px]">
                     <div className="flex justify-center">
                         <Link
-                            className="inline-flex items-center gap-x-2 rounded-full border p-1 ps-3 text-sm transition"
+                            className="inline-flex items-center gap-x-2 rounded-full border p-1 ps-3 text-sm transition text-center"
                             href="/shop"
                         >
                             🎁 New Collection – Shop Festive Gifts

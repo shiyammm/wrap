@@ -41,12 +41,12 @@ const Footer = () => {
                         🎁 Giftably
                     </div>
 
-                    <ul className="mt-6 flex items-center gap-4 flex-wrap">
+                    <ul className="mt-6 flex items-center gap-4 flex-wrap justify-center">
                         {footerLinks.map(({ title, href }) => (
                             <li key={title}>
                                 <Link
                                     href={href}
-                                    className="text-muted-foreground hover:text-foreground font-medium"
+                                    className="text-muted-foreground hover:text-foreground font-medium text-sm"
                                 >
                                     {title}
                                 </Link>
@@ -57,7 +57,7 @@ const Footer = () => {
                 <Separator />
                 <div className="py-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-x-2 gap-y-5 px-6 xl:px-0">
                     {/* Copyright */}
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground text-sm">
                         &copy; {new Date().getFullYear()}{" "}
                         <Link
                             href="/"
