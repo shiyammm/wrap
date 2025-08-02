@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { Product, Category, Review } from "@/lib/generated/prisma";
 import {
     Table,
     TableBody,
@@ -19,11 +18,13 @@ import {
     getSortedRowModel,
     ColumnDef,
     flexRender,
-    SortingState
+    SortingState,
+    ColumnFiltersState
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
 import Image from "next/image";
+import { Category, Product, Review } from "@/prisma/generated";
 
 type ExtendedProduct = Product & {
     category: Category;
@@ -36,7 +37,7 @@ type Props = {
 
 export default function ProductsList({ products }: Props) {
     const [globalFilter, setGlobalFilter] = useState("");
-    const [columnFilters, setColumnFilters] = useState<any[]>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
 
     const columns: ColumnDef<ExtendedProduct>[] = [
@@ -258,7 +259,6 @@ export default function ProductsList({ products }: Props) {
     );
 }
 
-// 👇 Sort icon helper
 function getSortIcon(direction: false | "asc" | "desc") {
     if (direction === "asc") return <ArrowUp className="w-4 h-4" />;
     if (direction === "desc") return <ArrowDown className="w-4 h-4" />;

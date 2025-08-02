@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/navigation-menu";
 import { useEffect, useState } from "react";
 import { getAllCategoriesNames } from "@/lib/actions/products.action";
-import type { Category } from "@/lib/generated/prisma";
 import { ShoppingCart } from "lucide-react";
 import NavAuthActions from "./NavAuth";
 import { useSession } from "@/lib/auth-client";
+import { Category } from "@/prisma/generated";
 
 export function Navbar() {
     const [categories, setCategories] = useState<Category[] | Array<null>>([]);

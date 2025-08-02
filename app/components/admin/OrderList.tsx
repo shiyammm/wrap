@@ -19,11 +19,13 @@ import {
     getSortedRowModel,
     ColumnDef,
     flexRender,
-    SortingState
+    SortingState,
+    ColumnFiltersState
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
-import { Category, OrderItem, Product } from "@/lib/generated/prisma";
+import { Category, OrderItem, Product } from "@/prisma/generated";
+import { Column } from "@tanstack/react-table";
 
 type OrderRow = OrderItem & {
     product: Product & { category: Category };
@@ -35,7 +37,7 @@ type Props = {
 
 export default function OrderList({ orders }: Props) {
     const [globalFilter, setGlobalFilter] = useState("");
-    const [columnFilters, setColumnFilters] = useState<any[]>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [sorting, setSorting] = useState<SortingState>([]);
 
     const columns: ColumnDef<OrderRow>[] = [
@@ -205,7 +207,13 @@ export default function OrderList({ orders }: Props) {
     );
 }
 
-function SortableHeader({ label, column }: { label: string; column: any }) {
+function SortableHeader({
+    label,
+    column
+}: {
+    label: string;
+    column: Column<OrderRow, unknown>;
+}) {
     return (
         <div
             className="cursor-pointer flex items-center gap-2"
