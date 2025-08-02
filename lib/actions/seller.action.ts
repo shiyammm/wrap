@@ -1,9 +1,8 @@
 "use server";
 
 import { prisma } from "../auth";
-import z, { success } from "zod";
+import z from "zod";
 import { productSchema } from "../validation";
-import { error } from "console";
 
 export const setSellerRole = async (userId: string) => {
     const user = await prisma.user.findUnique({ where: { id: userId } });

@@ -25,12 +25,6 @@ import {
 } from "@/lib/actions/cart.action";
 import { useSession } from "@/lib/auth-client";
 import {
-    Address,
-    CartItem,
-    PaymentMethod,
-    Product
-} from "@/lib/generated/prisma";
-import {
     Trash2,
     Plus,
     Minus,
@@ -54,6 +48,7 @@ import { createOrder, getOrderItemNamesById } from "@/lib/actions/order.action";
 import { createStripeSession } from "@/lib/actions/stripe";
 import { currency } from "@/constants";
 import { SkeletonCard } from "../ui/SkeletonCard";
+import { Address, CartItem, PaymentMethod, Product } from "@/prisma/generated";
 
 interface ShippingMethod {
     id: string;
@@ -202,7 +197,7 @@ export default function Cart() {
                 toast.error("Failed to update address");
             }
         } catch (error) {
-            toast.error("Something went wrong");
+            toast.error(`Something went wrong ${error}`);
         }
     };
 

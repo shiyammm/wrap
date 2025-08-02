@@ -5,18 +5,15 @@ import { currency } from "@/constants";
 import {
     addToCart,
     getProductFromCart,
-    removeCartItem,
-    updateCartFromCard,
-    updateCartItem
+    updateCartFromCard
 } from "@/lib/actions/cart.action";
 import { useSession } from "@/lib/auth-client";
-import { Product } from "@/lib/generated/prisma";
-import { Clock, Minus, Plus } from "lucide-react";
-import Image from "next/image";
+import { Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import ProductThumbnail from "../admin/ProductThumbnail";
+import { Product } from "@/prisma/generated";
 
 interface AddToCartPayload {
     productId: string;

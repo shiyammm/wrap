@@ -1,6 +1,5 @@
 "use server";
 
-import { get } from "http";
 import { prisma } from "../auth";
 
 export const getProducts = async () => {

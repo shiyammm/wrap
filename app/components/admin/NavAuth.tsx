@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ const NavAuthActions = () => {
         if (data?.user.id) {
             setShowAuthButtons(!showAuthButtons);
         }
-    }, [data]);
+    }, [data?.user.id]);
 
     const router = useRouter();
 

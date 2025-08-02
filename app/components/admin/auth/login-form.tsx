@@ -72,7 +72,7 @@ export function LoginForm({
                 }, 1000);
             });
         } catch (error) {
-            setError("An unexpected error occurred");
+            setError(`An unexpected error occurred ${error}`);
         }
     };
 

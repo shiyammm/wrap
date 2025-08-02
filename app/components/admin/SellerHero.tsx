@@ -1,10 +1,9 @@
 import React from "react";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Order, Product, Review, User } from "@/lib/generated/prisma";
 import profileImage from "@/public/profile_icon.png";
+import { Order, Product, Review, User } from "@/prisma/generated";
 
 interface SellerHeroProps {
     seller: User & { product: Product[]; order: Order[]; reviews: Review[] };

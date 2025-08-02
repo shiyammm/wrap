@@ -2,20 +2,14 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
 import Image from "next/image";
 import { toast } from "sonner";
-import {
-    upload,
-    ImageKitAbortError,
-    ImageKitInvalidRequestError,
-    ImageKitServerError,
-    ImageKitUploadNetworkError
-} from "@imagekit/next";
+import { upload } from "@imagekit/next";
 import { authenticator } from "@/lib/helpers";
-import { addProduct, getCategories } from "@/lib/actions/seller.action";
+import { addProduct } from "@/lib/actions/seller.action";
 import { productSchema } from "@/lib/validation";
 
 import {
@@ -37,7 +31,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Category } from "@/lib/generated/prisma";
 import { CategorySelect } from "./Categories";
 import imagePlaceholder from "@/public/upload_area.png";
 

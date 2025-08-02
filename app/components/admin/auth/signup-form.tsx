@@ -14,11 +14,10 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { toast } from "sonner";
 import { checkExistingUser } from "@/lib/actions/common.action";
-import { signIn, signUp } from "@/lib/auth-client";
+import {  signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { signUpForm } from "@/lib/validation";
 import { useState, useTransition } from "react";
-import { setSellerRole } from "@/lib/actions/seller.action";
 
 export function SignupForm({
     className,

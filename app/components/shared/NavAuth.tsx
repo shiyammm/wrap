@@ -22,7 +22,7 @@ const NavAuthActions = () => {
         if (data?.user.id) {
             setShowAuthButtons(!showAuthButtons);
         }
-    }, [data]);
+    }, [data?.user.id]);
 
     const router = useRouter();
 

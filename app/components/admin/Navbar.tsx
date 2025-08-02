@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Gift } from "lucide-react";
+import { Gift } from "lucide-react";
 import {
     NavigationMenu,
     NavigationMenuItem,

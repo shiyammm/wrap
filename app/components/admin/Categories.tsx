@@ -14,10 +14,10 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Category } from "@/lib/generated/prisma";
 import { createCategory, getCategories } from "@/lib/actions/seller.action";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Category } from "@/prisma/generated";
 
 export const CategorySelect = ({ field }: any) => {
     const [open, setOpen] = useState(false);
@@ -39,7 +39,7 @@ export const CategorySelect = ({ field }: any) => {
                     toast.error(res.error);
                 }
             } catch (error) {
-                toast.error("Something went wrong");
+                toast.error(`Something went wrong ${error}`);
             }
         });
     };
