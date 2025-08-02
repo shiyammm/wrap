@@ -1,7 +1,7 @@
 "use server";
 
+import { CartItem, PaymentMethod } from "@/prisma/generated";
 import { prisma } from "../auth";
-import { CartItem, PaymentMethod } from "../generated/prisma";
 
 export const getUserOrders = async (userId: string) => {
     const orders = await prisma.order.findMany({

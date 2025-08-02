@@ -1,7 +1,7 @@
 "use server";
 
+import { PaymentMethod } from "@/prisma/generated";
 import { prisma } from "../auth";
-import { PaymentMethod } from "../generated/prisma";
 import { createOrder } from "./order.action";
 
 export const addToCart = async (
