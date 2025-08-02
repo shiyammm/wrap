@@ -18,13 +18,23 @@ export async function POST() {
             success_url: `${origin}/order/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${origin}/canceled=true`
         });
+
         if (session.url) {
             return NextResponse.redirect(session.url, 303);
         }
-    } catch (err: any) {
+
         return NextResponse.json(
-            { error: err.message },
-            { status: err.statusCode || 500 }
+            { error: "Session URL not found" },
+            { status: 500 }
+        );
+    } catch (err) {
+        const error =
+            err instanceof Error ? err : new Error("Unknown server error");
+        const statusCode = (err as { statusCode?: number })?.statusCode ?? 500;
+
+        return NextResponse.json(
+            { error: error.message },
+            { status: statusCode }
         );
     }
 }
