@@ -1,0 +1,572 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
+import {
+    clearCart,
+    getCartItems,
+    getCartProductsToMakePayment,
+    removeCartItem,
+    updateCartItem
+} from "@/lib/actions/cart.action";
+import { useSession } from "@/lib/auth-client";
+import {
+    Address,
+    CartItem,
+    PaymentMethod,
+    Product
+} from "@/lib/generated/prisma";
+import {
+    Trash2,
+    Plus,
+    Minus,
+    Package,
+    CreditCard,
+    Truck,
+    Shield,
+    PlusCircle
+} from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState, useTransition } from "react";
+import { toast } from "sonner";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import Link from "next/link";
+import {
+    getUserAddresses,
+    selectUserAddress
+} from "@/lib/actions/address.action";
+import { useRouter } from "next/navigation";
+import { createOrder, getOrderItemNamesById } from "@/lib/actions/order.action";
+import { createStripeSession } from "@/lib/actions/stripe";
+import { currency } from "@/constants";
+import { SkeletonCard } from "../ui/SkeletonCard";
+
+interface ShippingMethod {
+    id: string;
+    name: string;
+    price: number;
+    estimatedDays: string;
+    description: string;
+}
+
+interface CartItemWithProduct extends CartItem {
+    product: Product;
+}
+
+export default function Cart() {
+    const [items, setItems] = useState<CartItemWithProduct[] | []>([]);
+    const { data } = useSession();
+    const router = useRouter();
+    const paymentMethods = ["COD", "CARD"];
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
+        PaymentMethod.COD
+    );
+    const [isLoading, setIsLoading] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const [addresses, setAddresses] = useState<Address[]>([]);
+
+    const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+        null
+    );
+
+    const [shippingMethod, setShippingMethod] = useState<string>("standard");
+
+    const shippingMethods: ShippingMethod[] = [
+        {
+            id: "standard",
+            name: "Standard Shipping",
+            price: 50,
+            estimatedDays: "3-5 days",
+            description: `Free shipping on orders over ${currency}500`
+        },
+        {
+            id: "express",
+            name: "Express Shipping",
+            price: 100,
+            estimatedDays: "1-2 days",
+            description: "Priority delivery with tracking"
+        }
+    ];
+
+    useEffect(() => {
+        const fetchAddress = async () => {
+            if (!data?.user?.id) return;
+
+            const addresses = await getUserAddresses(data.user.id);
+            setAddresses(addresses);
+
+            const selected = addresses.find((addr) => addr.isSelected);
+            if (selected) {
+                setSelectedAddressId(selected.id);
+            }
+        };
+
+        fetchAddress();
+    }, [data?.user?.id]);
+
+    useEffect(() => {
+        const fetchCart = async () => {
+            if (!data?.user?.id) return;
+
+            setIsLoading(true);
+            const cartItem = await getCartItems(data.user.id);
+            if (cartItem) {
+                setItems(cartItem);
+                setIsLoading(false);
+            }
+        };
+        fetchCart();
+    }, [data?.user.id]);
+
+    let subtotal = 0;
+
+    if (items && items.length > 0) {
+        subtotal = items.reduce((sum, item) => {
+            const priceInPaise =
+                item.product.discountedPrice ?? item.product.basePrice;
+            const totalForItem = (priceInPaise * item.quantity) / 100;
+            return sum + totalForItem;
+        }, 0);
+    }
+
+    const shipping =
+        shippingMethods.find((m) => m.id === shippingMethod)?.price || 0;
+
+    const total = subtotal + shipping;
+
+    const updateQuantity = async (id: string, change: number) => {
+        const item = items.find((i) => i.id === id);
+        if (!item) return;
+
+        const newQuantity = item.quantity + change;
+
+        if (newQuantity <= 0) {
+            setItems((prev) => prev.filter((i) => i.id !== id));
+
+            try {
+                const removed = await removeCartItem(id);
+                if (!removed) throw new Error("Failed to remove cart item");
+                toast.success("Item removed from cart");
+            } catch (err) {
+                console.error(err);
+                toast.error("Error removing item");
+            }
+        } else {
+            setItems((prev) =>
+                prev.map((i) =>
+                    i.id === id ? { ...i, quantity: newQuantity } : i
+                )
+            );
+
+            try {
+                const updated = await updateCartItem(id, newQuantity);
+                if (!updated) throw new Error("Failed to update cart item");
+            } catch (err) {
+                console.error(err);
+                toast.error("Error updating item");
+            }
+        }
+    };
+
+    const removeItem = async (id: string) => {
+        setItems((prev) => prev.filter((item) => item.id !== id));
+        await removeCartItem(id);
+        toast.success("Item removed from cart successfully");
+    };
+
+    const updateSelectedAddress = async (userId: string, addressId: string) => {
+        try {
+            toast.loading("Updating the selected address...", {
+                id: "update-address"
+            });
+
+            const updated = await selectUserAddress(userId, addressId);
+            if (updated) {
+                setSelectedAddressId(addressId);
+                toast.success("Address updated", { id: "update-address" });
+            } else {
+                toast.error("Failed to update address");
+            }
+        } catch (error) {
+            toast.error("Something went wrong");
+        }
+    };
+
+    const proceedToCheckout = async () => {
+        if (
+            !data?.user.id ||
+            !selectedAddressId ||
+            !paymentMethod ||
+            !total ||
+            !shippingMethod
+        ) {
+            toast.error("Missing checkout information.");
+            return;
+        }
+        startTransition(async () => {
+            try {
+                const order = await getCartProductsToMakePayment(
+                    data.user.id,
+                    selectedAddressId,
+                    paymentMethod,
+                    total,
+                    shippingMethod
+                );
+
+                if (paymentMethod === "CARD") {
+                    const orderDetails = await getOrderItemNamesById(order.id);
+                    if (orderDetails) {
+                        const sessionUrl = await createStripeSession(
+                            orderDetails.id,
+                            orderDetails.orderItems.map((item) => ({
+                                name: item.product.name,
+                                amount: item.price,
+                                quantity: item.quantity
+                            }))
+                        );
+                        router.push(`${sessionUrl}`);
+                    }
+                } else {
+                    await clearCart(data.user.id);
+                    setItems([]);
+                    toast.success("Order placed successfully");
+                    router.refresh();
+                }
+            } catch (error) {
+                toast.error("Checkout failed.");
+                console.error(error);
+            }
+        });
+    };
+
+    return (
+        <div className="mx-auto w-full max-w-7xl p-6">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div className="space-y-6 lg:col-span-2">
+                    <div>
+                        <h1 className="text-2xl font-semibold">
+                            Shopping Cart{" "}
+                        </h1>
+                        <p
+                            className={`text-muted-foreground ${
+                                isLoading && "hidden"
+                            }`}
+                        >
+                            {items.length}{" "}
+                            {items.length === 1 ? "item" : "items"} in your cart
+                        </p>
+                    </div>
+
+                    {isLoading && <SkeletonCard />}
+
+                    <div className="space-y-4">
+                        {items.map((item) => (
+                            <Card key={item.id} className="overflow-hidden p-0">
+                                <CardContent className="p-0">
+                                    <div className="flex h-full flex-col md:flex-row">
+                                        <div className="relative h-auto w-full md:w-32">
+                                            <Image
+                                                src={
+                                                    "https://images.unsplash.com/photo-1682688759350-050208b1211c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                                                }
+                                                alt={item.product.name}
+                                                width={500}
+                                                height={500}
+                                                className="h-full w-full object-cover md:w-32"
+                                            />
+                                        </div>
+
+                                        <div className="flex-1 p-6 pb-3">
+                                            <div className="flex justify-between">
+                                                <div>
+                                                    <h3 className="font-medium">
+                                                        {item.product.name}
+                                                    </h3>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() =>
+                                                        removeItem(item.id)
+                                                    }
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+
+                                            <div className="mt-4 flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            updateQuantity(
+                                                                item.id,
+                                                                -1
+                                                            )
+                                                        }
+                                                    >
+                                                        <Minus className="h-4 w-4" />
+                                                    </Button>
+                                                    <span className="w-8 text-center">
+                                                        {item.quantity}
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            updateQuantity(
+                                                                item.id,
+                                                                1
+                                                            )
+                                                        }
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+
+                                                <div className="text-right">
+                                                    <div className="font-medium">
+                                                        {currency}
+                                                        {item.product
+                                                            .discountedPrice !==
+                                                            null &&
+                                                            (item.product
+                                                                .discountedPrice /
+                                                                100) *
+                                                                item.quantity}
+                                                    </div>
+                                                    {item.product.basePrice && (
+                                                        <div className="text-muted-foreground text-sm line-through">
+                                                            {currency}
+                                                            {(
+                                                                (item.product
+                                                                    .basePrice /
+                                                                    100) *
+                                                                item.quantity
+                                                            ).toFixed(2)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Order Summary</CardTitle>
+                            <CardDescription>
+                                Review your order details and shipping
+                                information
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label>Shipping Address</Label>
+                                {addresses.length > 0 ? (
+                                    <RadioGroup
+                                        value={selectedAddressId}
+                                        onValueChange={(id) => {
+                                            if (!data?.user?.id) return;
+                                            updateSelectedAddress(
+                                                data.user.id,
+                                                id
+                                            );
+                                        }}
+                                        className="space-y-4 mt-5"
+                                    >
+                                        {addresses.map((addr) => (
+                                            <div
+                                                key={addr.id}
+                                                className="flex items-start space-x-2"
+                                            >
+                                                <RadioGroupItem
+                                                    value={addr.id}
+                                                />
+                                                <div className="text-sm leading-tight">
+                                                    <p>{addr.street}</p>
+                                                    <p>
+                                                        {addr.city},{" "}
+                                                        {addr.state}{" "}
+                                                        {addr.zipcode}
+                                                    </p>
+                                                    <p>{addr.country}</p>
+                                                    <p>{addr.phone}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </RadioGroup>
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">
+                                        No address found. Please add a shipping
+                                        address.
+                                    </p>
+                                )}
+
+                                <Link href="/add-address">
+                                    <Button
+                                        variant="outline"
+                                        className="text-sm text-primary px-0 w-full mt-3"
+                                    >
+                                        <PlusCircle className="mr-2 h-4 w-4" />
+                                        Add Address
+                                    </Button>
+                                </Link>
+                            </div>
+                            {items.length > 0 && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label>Shipping Method</Label>
+                                        <Select
+                                            value={shippingMethod}
+                                            onValueChange={setShippingMethod}
+                                        >
+                                            <SelectTrigger className="w-full max-w-none data-[size=default]:h-auto">
+                                                <SelectValue placeholder="Select shipping method" />
+                                            </SelectTrigger>
+                                            <SelectContent className="!h-auto">
+                                                {shippingMethods.map(
+                                                    (method) => (
+                                                        <SelectItem
+                                                            key={method.id}
+                                                            value={method.id}
+                                                            className="!h-auto"
+                                                        >
+                                                            <div className="flex flex-col justify-between text-start">
+                                                                <div className="font-medium">
+                                                                    {
+                                                                        method.name
+                                                                    }
+                                                                </div>
+                                                                <div className="text-muted-foreground text-sm">
+                                                                    {
+                                                                        method.estimatedDays
+                                                                    }
+                                                                </div>
+                                                                <div className="font-medium">
+                                                                    {currency}
+                                                                    {method.price.toFixed(
+                                                                        2
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Payment Method</Label>
+                                        <Select
+                                            value={paymentMethod}
+                                            onValueChange={(val: string) =>
+                                                setPaymentMethod(
+                                                    val as PaymentMethod
+                                                )
+                                            }
+                                        >
+                                            <SelectTrigger className="w-full max-w-none data-[size=default]:h-auto">
+                                                <SelectValue placeholder="Select shipping method" />
+                                            </SelectTrigger>
+                                            <SelectContent className="!h-auto">
+                                                {paymentMethods.map(
+                                                    (method) => (
+                                                        <SelectItem
+                                                            key={method}
+                                                            value={method}
+                                                            className="!h-auto"
+                                                        >
+                                                            <div className="flex flex-col justify-between text-start">
+                                                                <div className="font-medium">
+                                                                    {method}
+                                                                </div>
+                                                            </div>
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-sm">
+                                            <span>Subtotal</span>
+                                            <span>
+                                                {currency}
+                                                {subtotal.toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span>Shipping</span>
+                                            <span>
+                                                {currency}
+                                                {shipping.toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between font-medium">
+                                            <span>Total</span>
+                                            <span>
+                                                {currency}
+                                                {total.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4 border-t pt-4">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Package className="text-primary h-4 w-4" />
+                                            <span>
+                                                Free returns within 30 days
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Shield className="text-primary h-4 w-4" />
+                                            <span>Secure payment</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <Truck className="text-primary h-4 w-4" />
+                                            <span>Fast delivery</span>
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        className="w-full cursor-pointer"
+                                        onClick={proceedToCheckout}
+                                    >
+                                        <CreditCard className="mr-2 h-4 w-4" />
+                                        {isPending
+                                            ? "Proceeding to checkout..."
+                                            : "Proceed to Checkout"}
+                                    </Button>
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
+}

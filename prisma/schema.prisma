@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean
+  image         String?
+  role          Role     @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  products  Product[] // If seller
+  orders    Order[] // If buyer
+  cartItems CartItem[]
+  reviews   Review[]
+  addresses Address[]
+
+  sessions  Session[]
+  accounts  Account[]
+  OrderItem OrderItem[]
+
+  @@map("user")
+}
+
+model Product {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  images          String[] // Array of image URLs
+  category        Category @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  sellerId        String
+  seller          User     @relation(fields: [sellerId], references: [id])
+  basePrice       Int // In paise (₹150 = 15000)
+  discountedPrice Int?
+  inStock         Int
+  isPublished     Boolean  @default(false)
+
+  orders  OrderItem[]
+  reviews Review[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  CartItem  CartItem[]
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  products Product[]
+}
+
+model Order {
+  id             String         @id @default(uuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id])
+  addressId      String
+  address        Address        @relation(fields: [addressId], references: [id])
+  paymentMethod  PaymentMethod
+  isPaid         Boolean        @default(false)
+  deliveryStatus DeliveryStatus @default(PENDING)
+  totalAmount    Int
+  orderItems     OrderItem[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  shippingMethod String?
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+  sellerId  String
+  Seller    User    @relation(fields: [sellerId], references: [id])
+}
+
+model CartItem {
+  id        String  @id @default(uuid())
+  userId    String
+  productId String
+  quantity  Int
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Address {
+  id         String  @id @default(uuid())
+  userId     String
+  firstName  String
+  lastName   String
+  email      String
+  street     String
+  city       String
+  state      String
+  zipcode    String
+  country    String
+  phone      String
+  user       User    @relation(fields: [userId], references: [id])
+  Order      Order[]
+  isSelected Boolean @default(false)
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+  SELLER
+}
+
+enum PaymentMethod {
+  CARD
+  COD
+}
+
+enum DeliveryStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  RETURNED
+  CANCELLED
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}

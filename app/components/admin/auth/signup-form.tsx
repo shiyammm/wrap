@@ -1,0 +1,188 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { toast } from "sonner";
+import { checkExistingUser } from "@/lib/actions/common.action";
+import { signIn, signUp } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { signUpForm } from "@/lib/validation";
+import { useState, useTransition } from "react";
+import { setSellerRole } from "@/lib/actions/seller.action";
+
+export function SignupForm({
+    className,
+    ...props
+}: React.ComponentProps<"div">) {
+    const router = useRouter();
+    const [error, setError] = useState("");
+    const [isPending, startTransition] = useTransition();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        startTransition(async () => {
+            const formData = new FormData(e.currentTarget as HTMLFormElement);
+            const res = signUpForm.safeParse({
+                name: formData.get("name"),
+                email: formData.get("email"),
+                password: formData.get("password"),
+                confirmPassword: formData.get("confirm-password")
+            });
+
+            if (!res.success) {
+                setError(
+                    JSON.parse(res.error.message)[0].message ||
+                        "Validation error"
+                );
+                return;
+            }
+
+            const { name, email, password } = res.data;
+
+            const isExistingUser = await checkExistingUser(email);
+
+            if (!isExistingUser.success) {
+                toast.error(isExistingUser.message);
+                setError(isExistingUser.message);
+                return;
+            }
+
+            const newUser = await signUp.email({
+                name,
+                email,
+                password
+            });
+
+            if (newUser.error) {
+                toast.error(newUser.error.message);
+                return;
+            }
+
+            console.log("entering");
+
+            if (newUser.data) {
+                console.log("entering-1");
+                if (!newUser.data.user.id) return;
+
+                const updateSellerRole = await fetch("/api/set-role", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId: newUser.data.user.id })
+                });
+                console.log("entering-2");
+
+                if (updateSellerRole) {
+                    toast.success("Account created successfully!");
+                    setTimeout(() => {
+                        router.push("/");
+                    }, 1000);
+                    return;
+                } else {
+                    toast.error("Something went wrong. Try again later");
+                    return;
+                }
+            }
+        });
+    };
+
+    return (
+        <div className={cn("flex flex-col gap-6", className)} {...props}>
+            <div className="text-center space-y-2">
+                <h2 className="text-3xl font-bold tracking-tight">
+                    Create a Seller Account
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                    Manage your products, track orders, and grow your business
+                    with Giftably.
+                </p>
+                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
+                    Seller Account
+                </span>
+            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Create an account</CardTitle>
+                    <CardDescription>
+                        Fill in the details below to get started with Giftably.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit}>
+                        <div className="flex flex-col gap-6">
+                            <div className="grid gap-3">
+                                <Label htmlFor="name">Full Name</Label>
+                                <Input
+                                    id="name"
+                                    type="text"
+                                    name="name"
+                                    placeholder="Jane Doe"
+                                    required
+                                />
+                            </div>
+                            <div className="grid gap-3">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    placeholder="jane@example.com"
+                                    required
+                                />
+                            </div>
+                            <div className="grid gap-3">
+                                <Label htmlFor="password">Password</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    name="password"
+                                    required
+                                />
+                            </div>
+                            <div className="grid gap-3">
+                                <Label htmlFor="confirm-password">
+                                    Confirm Password
+                                </Label>
+                                <Input
+                                    id="confirm-password"
+                                    name="confirm-password"
+                                    type="password"
+                                    required
+                                />
+                            </div>
+                            {error && (
+                                <div className="text-red-500 text-sm font-medium">
+                                    {error}
+                                </div>
+                            )}
+                            <div className="flex flex-col gap-3">
+                                <Button type="submit" className="w-full">
+                                    {isPending
+                                        ? "Creating Account ..."
+                                        : "Create Account"}
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="mt-4 text-center text-sm">
+                            Already have an account?{" "}
+                            <Link
+                                href="/seller/auth/login"
+                                className="underline underline-offset-4"
+                            >
+                                Login
+                            </Link>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
