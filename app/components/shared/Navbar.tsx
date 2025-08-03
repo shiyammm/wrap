@@ -21,7 +21,7 @@ import {
     navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { getAllCategoriesNames } from "@/lib/actions/products.action";
 import NavAuthActions from "./NavAuth";
 import { signOut, useSession } from "@/lib/auth-client";
@@ -148,8 +148,13 @@ export function Navbar() {
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
-
-                    <SearchProduct />
+                    <Suspense
+                        fallback={
+                            <div className="w-[280px] h-9 bg-gray-100 dark:bg-gray-800 rounded" />
+                        }
+                    >
+                        <SearchProduct />
+                    </Suspense>
                     {user && (
                         <Button variant="outline" asChild>
                             <Link href="/cart">
