@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
-import { useRouter, useSearchParams } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import {
     addUserAddress,
     getAddressById,
@@ -27,6 +27,9 @@ type AddressFormValues = z.infer<typeof AddressSchema>;
 const AddAddressPage = () => {
     const { data } = useSession();
     const userId = data?.user.id || "";
+    
+    if (!userId) redirect("/login");
+
     const [isPending, startTransition] = useTransition();
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
