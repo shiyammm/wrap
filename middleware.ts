@@ -24,7 +24,9 @@ export const middleware = async (req: NextRequest) => {
         return NextResponse.next();
     }
 
-    const sessionToken = req.cookies.get("better-auth.session_token")?.value;
+    const sessionToken =
+        req.cookies.get("__Secure-better-auth.session_token")?.value ||
+        req.cookies.get("better-auth.session_token")?.value;
 
     if (!sessionToken) {
         if (
@@ -52,7 +54,11 @@ export const middleware = async (req: NextRequest) => {
     try {
         const roleResponse = await fetch(new URL("/api/get-role", req.url), {
             headers: {
-                cookie: `better-auth.session_token=${sessionToken}`
+                cookie: `${
+                    req.cookies.get("__Secure-better-auth.session_token")
+                        ? "__Secure-"
+                        : ""
+                }better-auth.session_token=${sessionToken}`
             },
             cache: "no-store"
         });
