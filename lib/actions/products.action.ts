@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/prisma/generated";
 import { prisma } from "../auth";
 
 export const getProducts = async () => {
@@ -93,41 +94,43 @@ export const getCategoryName = async (categoryId: string) => {
     return category.name;
 };
 
-export const searchProductsByName = async (name: string) => {
+export const searchProductsByName = async (
+    name: string,
+    page: number = 1,
+    limit: number = 8
+) => {
     try {
-        if (!name) {
-            return await prisma.product.findMany({
-                where: {
-                    inStock: {
-                        gt: 0
-                    }
-                },
+        const skip = (page - 1) * limit;
+
+        const whereClause = {
+            name: name
+                ? {
+                      contains: name,
+                      mode: Prisma.QueryMode.insensitive
+                  }
+                : undefined,
+            inStock: {
+                gt: 0
+            }
+        };
+
+        const [products, totalCount] = await Promise.all([
+            prisma.product.findMany({
+                where: whereClause,
+                skip,
+                take: limit,
                 include: {
                     category: true,
                     reviews: true,
                     seller: true
                 }
-            });
-        }
+            }),
+            prisma.product.count({
+                where: whereClause
+            })
+        ]);
 
-        const data = await prisma.product.findMany({
-            where: {
-                name: {
-                    contains: name,
-                    mode: "insensitive"
-                },
-                inStock: {
-                    gt: 0
-                }
-            },
-            include: {
-                category: true,
-                reviews: true,
-                seller: true
-            }
-        });
-
-        return data;
+        return { products, totalCount };
     } catch (error) {
         console.error("Error fetching products:", error);
         throw new Error("Failed to fetch products data");

@@ -1,6 +1,7 @@
 import React from "react";
 import ProductCard from "./ProductCard";
 import { getProducts } from "@/lib/actions/products.action";
+import { SkeletonCard } from "./SkeletonCard";
 
 const BestGifts = async () => {
     const products = await getProducts();
@@ -13,13 +14,21 @@ const BestGifts = async () => {
                 </h2>
 
                 <div className="flex flex-wrap gap-6 justify-center">
-                    {products.slice(0, 8).map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            {...product}
-                            reviews={product.reviews[0] ?? []}
-                        />
-                    ))}
+                    {products.length > 0
+                        ? products
+                              .slice(0, 8)
+                              .map((product) => (
+                                  <ProductCard
+                                      key={product.id}
+                                      {...product}
+                                      reviews={product.reviews[0] ?? []}
+                                  />
+                              ))
+                        : Array.from({ length: 8 }).map((_, i) => (
+                              <div key={i} className="w-[330px]">
+                                  <SkeletonCard />
+                              </div>
+                          ))}
                 </div>
             </div>
         </section>

@@ -86,9 +86,9 @@ function ProductCard({
                 </div>
 
                 {/* Content */}
-                <div className="flex flex-1 flex-col gap-3 p-5">
+                <div className="flex flex-1 flex-col p-5">
                     <div>
-                        <h3 className="mb-1.5 text-xl font-semibold text-gray-900 dark:text-white">
+                        <h3 className="mb-1.5 text-lg font-semibold text-gray-900 dark:text-white">
                             {name.slice(0, 25)}...
                         </h3>
 
@@ -110,7 +110,7 @@ function ProductCard({
                     </div>
 
                     <div className="mt-auto flex flex-col">
-                        <div className="text-2xl font-bold text-rose-700 dark:text-rose-400">
+                        <div className="text-lg font-bold text-rose-700 dark:text-rose-400">
                             {discountedPrice && (
                                 <span>
                                     {currency}
@@ -135,13 +135,13 @@ function ProductCard({
                 <Button
                     variant="outline"
                     onClick={() => onAddToCart(id, 1, userId)}
-                    className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700"
+                    className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700 text-sm"
                 >
                     {isPending ? "Adding..." : "Add to Cart"}
                 </Button>
                 <Button
                     onClick={onBuyNow}
-                    className="w-full bg-gradient-to-r from-rose-400 to-pink-300 text-white transition-all hover:from-rose-400 hover:to-pink-300"
+                    className="w-full bg-gradient-to-r from-rose-400 to-pink-300 text-white transition-all hover:from-rose-400 hover:to-pink-300 text-sm"
                 >
                     Buy now
                 </Button>
