@@ -4,12 +4,17 @@ import ProductCard from "@/app/components/ui/ProductCard";
 import { PaginationDemo } from "../../components/Pagination";
 
 interface ShopPageProps {
-    searchParams: { search?: string; page?: string };
+    search?: string;
+    page?: string;
 }
 
-const ShopPage = async ({ searchParams }: ShopPageProps) => {
-    const search = searchParams.search || "";
-    const currentPage = Number(searchParams.page) || 1;
+const ShopPage = async ({
+    searchParams
+}: {
+    searchParams: Promise<ShopPageProps>;
+}) => {
+    const search = (await searchParams).search || "";
+    const currentPage = Number((await searchParams).page) || 1;
     const limit = 8;
 
     const { products, totalCount } = await searchProductsByName(
