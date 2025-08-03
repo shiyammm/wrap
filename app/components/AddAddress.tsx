@@ -10,22 +10,102 @@ import {
     FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import React from "react";
-import { UseFormReturn } from "react-hook-form";
+import React, { useEffect, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { AddressSchema } from "@/lib/types";
 import * as z from "zod";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import {
+    addUserAddress,
+    getAddressById,
+    updateUserAddress
+} from "@/lib/actions/address.action";
 
 type AddressFormValues = z.infer<typeof AddressSchema>;
 
-interface AddAddressProps {
-    form: UseFormReturn<AddressFormValues>;
-    onSubmit: (values: AddressFormValues) => void;
-    isPending: boolean;
-    router: AppRouterInstance;
-}
+const AddAddress = ({ userId, id }: { userId: string; id: string }) => {
+    const [isPending, startTransition] = useTransition();
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
+    const [addressId, setAddressId] = useState<string | null>(null);
 
-const AddAddress = ({ form, onSubmit, isPending, router }: AddAddressProps) => {
+    const form = useForm<AddressFormValues>({
+        resolver: zodResolver(AddressSchema),
+        defaultValues: {
+            firstName: "",
+            lastName: "",
+            email: "",
+            street: "",
+            city: "",
+            state: "",
+            zipcode: "",
+            country: "",
+            phone: ""
+        }
+    });
+
+    const {
+        reset,
+        formState: { errors }
+    } = form;
+
+    const onSubmit = async (values: AddressFormValues) => {
+        startTransition(async () => {
+            try {
+                if (!userId) {
+                    toast.error("Login to add address");
+                }
+
+                if (addressId) {
+                    await updateUserAddress(addressId, values);
+                    toast.success("Address updated successfully!");
+                } else {
+                    await addUserAddress(values, userId);
+                    toast.success("Address added successfully!");
+                }
+
+                setTimeout(() => {
+                    router.push("/profile");
+                }, 500);
+            } catch (error) {
+                console.error("Failed to submit address:", error);
+            }
+        });
+    };
+
+    useEffect(() => {
+        const fetchAddress = async () => {
+            if (!id) {
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const existingAddress = await getAddressById(id);
+                if (existingAddress) {
+                    reset(existingAddress);
+                    setAddressId(existingAddress.id);
+                }
+            } catch (error) {
+                console.error("Error fetching address:", error);
+                toast.error("Failed to fetch address for editing.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchAddress();
+    }, [id]);
+
+    if (isLoading)
+        return (
+            <p className="text-center py-10 text-sm">
+                Getting address input...
+            </p>
+        );
+
     return (
         <Form {...form}>
             <form
@@ -41,7 +121,7 @@ const AddAddress = ({ form, onSubmit, isPending, router }: AddAddressProps) => {
                             <FormControl>
                                 <Input placeholder="John" {...field} />
                             </FormControl>
-                        <FormMessage />
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
