@@ -7,7 +7,7 @@ import { FaFacebook } from "react-icons/fa";
 const footerLinks = [
     {
         title: "Shop All Gifts",
-        href: "#"
+        href: "/shop"
     },
     {
         title: "Occasions",

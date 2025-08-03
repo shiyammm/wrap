@@ -24,13 +24,20 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useEffect, useState } from "react";
 import { getAllCategoriesNames } from "@/lib/actions/products.action";
 import NavAuthActions from "./NavAuth";
-import { useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { Category } from "@/prisma/generated";
+import SearchProduct from "./SearchProduct";
+import { DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { useRouter } from "next/navigation";
 
 export function Navbar() {
     const [categories, setCategories] = useState<Category[]>([]);
     const { data } = useSession();
-    const [user, setUser] = useState("");
+    const router = useRouter();
+
+    const user = data?.user.id;
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -43,12 +50,6 @@ export function Navbar() {
         };
         fetchCategories();
     }, []);
-
-    useEffect(() => {
-        if (data?.user.id) {
-            setUser(data.user.id);
-        }
-    }, [data?.session?.id]);
 
     return (
         <nav className="w-full border-b py-2 bg-white sticky top-0 z-50">
@@ -117,7 +118,7 @@ export function Navbar() {
                                     Categories
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <ul className="grid w-[200px] gap-4">
+                                    <ul className="grid w-[200px] gap-2">
                                         {categories
                                             .slice(0, 6)
                                             .map((category) => (
@@ -125,7 +126,7 @@ export function Navbar() {
                                                     <NavigationMenuLink asChild>
                                                         <Link
                                                             href={`/categories/${category?.id}`}
-                                                            className="text-sm font-medium capitalize"
+                                                            className="text-sm capitalize text-muted-foreground"
                                                         >
                                                             {category?.name}
                                                         </Link>
@@ -136,7 +137,7 @@ export function Navbar() {
                                             <NavigationMenuLink asChild>
                                                 <Link
                                                     href="/categories"
-                                                    className="text-sm font-medium"
+                                                    className="text-sm capitalize text-muted-foreground"
                                                 >
                                                     View All Categories
                                                 </Link>
@@ -148,15 +149,7 @@ export function Navbar() {
                         </NavigationMenuList>
                     </NavigationMenu>
 
-                    <div className="flex items-center relative ml-auto w-full max-w-[280px]">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="text"
-                            placeholder="Search gifts..."
-                            className="pl-8"
-                        />
-                    </div>
-
+                    <SearchProduct />
                     {user && (
                         <Button variant="outline" asChild>
                             <Link href="/cart">
@@ -175,6 +168,9 @@ export function Navbar() {
                         </Link>
                     )}
                     <Sheet>
+                        <VisuallyHidden>
+                            <DialogTitle>Navigation Menu</DialogTitle>
+                        </VisuallyHidden>
                         <SheetTrigger asChild>
                             <Button variant="ghost" size="icon">
                                 <Menu className="h-5 w-5" />
@@ -220,14 +216,37 @@ export function Navbar() {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="md:hidden">
-                                <NavAuthActions />
+                            <div className="flex justify-between items-center">
+                                <Avatar className="h-8 w-8 cursor-pointer rounded-2xl flex items-center justify-center bg-gray-100">
+                                    <div>
+                                        <AvatarImage
+                                            src={data?.user.image || ""}
+                                            alt={data?.user.name || "User"}
+                                            onClick={() =>
+                                                router.push("/profile")
+                                            }
+                                        />
+                                    </div>
+                                    <AvatarFallback>
+                                        {data?.user?.name
+                                            ?.charAt(0)
+                                            .toUpperCase() || "U"}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <Button
+                                    variant={"secondary"}
+                                    onClick={async () => {
+                                        await signOut();
+                                        router.push("/");
+                                    }}
+                                >
+                                    Logout
+                                </Button>
                             </div>
                         </SheetContent>
                     </Sheet>
                 </div>
 
-                {/* Auth Buttons (Both views) */}
                 <div className="hidden md:block">
                     <NavAuthActions />
                 </div>

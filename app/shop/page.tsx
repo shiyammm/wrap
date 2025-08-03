@@ -1,9 +1,13 @@
 import React from "react";
-import { getProducts } from "@/lib/actions/products.action";
+import { searchProductsByName } from "@/lib/actions/products.action";
 import ProductCard from "@/app/components/ui/ProductCard";
+interface ShopPageProps {
+    searchParams: Promise<{ search?: string }>;
+}
+const ShopPage = async ({ searchParams }: ShopPageProps) => {
+    const searchQuery = await searchParams;
 
-const ShopPage = async () => {
-    const products = await getProducts();
+    const products = await searchProductsByName(searchQuery.search || "");
 
     return (
         <section className="min-h-screen w-full bg-white py-10">
@@ -17,22 +21,23 @@ const ShopPage = async () => {
                         occasion.
                     </p>
                 </div>
-
-                {products.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {products.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                {...product}
-                                reviews={product.reviews[0] ?? []}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-center text-gray-500">
-                        No products available.
-                    </p>
-                )}
+                <div className="w-full bg-gradient-to-b from-pink-50 to-white py-12 rounded-xl">
+                    {products.length > 0 ? (
+                        <div className="flex flex-wrap justify-center gap-6">
+                            {products.map((product) => (
+                                <ProductCard
+                                    key={product.id}
+                                    {...product}
+                                    reviews={product.reviews[0] ?? []}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-center text-gray-500">
+                            No products available.
+                        </p>
+                    )}
+                </div>
             </div>
         </section>
     );

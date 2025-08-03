@@ -11,22 +11,13 @@ import { useRouter } from "next/navigation";
 import { signOut, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 const NavAuthActions = () => {
-    const [showAuthButtons, setShowAuthButtons] = useState(true);
     const { data } = useSession();
     const user = data?.user;
-
-    useEffect(() => {
-        if (data?.user.id) {
-            setShowAuthButtons(!showAuthButtons);
-        }
-    }, [data?.user.id, showAuthButtons]);
-
     const router = useRouter();
 
-    if (showAuthButtons) {
+    if (!user?.id) {
         return (
             <div className="flex gap-2">
                 <Button variant="outline" size="sm" asChild>
@@ -43,10 +34,7 @@ const NavAuthActions = () => {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Avatar className="h-8 w-8 cursor-pointer">
-                    <AvatarImage
-                        src={user?.image || ""}
-                        alt={user?.name || "User"}
-                    />
+                    <AvatarImage src={user.image || ""} alt={user.name || "User"} />
                     <AvatarFallback>
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
@@ -57,16 +45,10 @@ const NavAuthActions = () => {
                     Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    onClick={async () =>
-                        await signOut({
-                            fetchOptions: {
-                                onSuccess: () => {
-                                    setShowAuthButtons(true);
-                                    router.push("/");
-                                }
-                            }
-                        })
-                    }
+                    onClick={async () => {
+                        await signOut();
+                        router.push("/");
+                    }}
                 >
                     Logout
                 </DropdownMenuItem>

@@ -68,7 +68,7 @@ function ProductCard({
     };
 
     return (
-        <div className="flex w-[350px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 ">
+        <div className="flex w-[340px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 ">
             <div
                 className="group relative cursor-pointer"
                 onClick={() => router.push(`/shop/${id}`)}

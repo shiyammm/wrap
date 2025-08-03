@@ -51,7 +51,7 @@ const ProductDetailsPage = async ({ params }: { params: paramsType }) => {
                         perfect for any celebration or special moment.
                     </p>
                 </div>
-                <div className="flex gap-5 mt-[5rem]">
+                <div className="flex gap-5 mt-[5rem] flex-wrap justify-center">
                     {relatedProducts.length > 0 &&
                         relatedProducts
                             .filter((product) => product.id !== productId)

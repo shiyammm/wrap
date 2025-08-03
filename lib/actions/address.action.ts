@@ -75,3 +75,31 @@ export const selectUserAddress = async (userId: string, addressId: string) => {
 
     return updated;
 };
+
+export const getAddressById = async (id: string) => {
+    try {
+        const address = await prisma.address.findUnique({
+            where: { id }
+        });
+        return address;
+    } catch (err) {
+        console.error("Error fetching address:", err);
+        return null;
+    }
+};
+
+export const updateUserAddress = async (
+    id: string,
+    values: AddressFormValues
+) => {
+    try {
+        const updated = await prisma.address.update({
+            where: { id },
+            data: values
+        });
+        return updated;
+    } catch (err) {
+        console.error("Error updating address:", err);
+        return null;
+    }
+};

@@ -31,7 +31,7 @@ const CategoryPage = async ({ params }: { params: paramsType }) => {
         <div className="container mx-auto px-4 py-10">
             {categoryName ? (
                 <h1 className="mb-6 text-3xl font-bold capitalize text-gray-800 dark:text-white">
-                    Products in {categoryName.replaceAll("-", " ")} Category
+                    🎁 Products in {categoryName.replaceAll("-", " ")} Category
                 </h1>
             ) : (
                 <h1>Category not found</h1>
@@ -41,7 +41,7 @@ const CategoryPage = async ({ params }: { params: paramsType }) => {
                     No products found in this category.
                 </p>
             ) : (
-                <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                <div className="flex flex-wrap gap-6 justify-center md:justify-start">
                     {products.map((product) => (
                         <ProductCard
                             key={product.id}

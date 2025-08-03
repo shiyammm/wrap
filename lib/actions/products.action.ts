@@ -93,4 +93,43 @@ export const getCategoryName = async (categoryId: string) => {
     return category.name;
 };
 
+export const searchProductsByName = async (name: string) => {
+    try {
+        if (!name) {
+            return await prisma.product.findMany({
+                where: {
+                    inStock: {
+                        gt: 0
+                    }
+                },
+                include: {
+                    category: true,
+                    reviews: true,
+                    seller: true
+                }
+            });
+        }
 
+        const data = await prisma.product.findMany({
+            where: {
+                name: {
+                    contains: name,
+                    mode: "insensitive"
+                },
+                inStock: {
+                    gt: 0
+                }
+            },
+            include: {
+                category: true,
+                reviews: true,
+                seller: true
+            }
+        });
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        throw new Error("Failed to fetch products data");
+    }
+};
