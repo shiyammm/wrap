@@ -8,8 +8,8 @@ import {
     CardTitle
 } from "@/components/ui/card";
 import { redirect } from "next/navigation";
-import AddAddress from "../components/AddAddress";
 import { getSession } from "@/lib/auth";
+import AddAddress from "@/app/components/AddAddress";
 
 type paramsType = Promise<{ id: string }>;
 

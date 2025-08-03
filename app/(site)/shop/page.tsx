@@ -1,7 +1,7 @@
 import React from "react";
 import { searchProductsByName } from "@/lib/actions/products.action";
 import ProductCard from "@/app/components/ui/ProductCard";
-import { PaginationDemo } from "../components/Pagination";
+import { PaginationDemo } from "../../components/Pagination";
 
 interface ShopPageProps {
     searchParams: { search?: string; page?: string };
