@@ -28,16 +28,15 @@ export const middleware = async (req: NextRequest) => {
         req.cookies.get("__Secure-better-auth.session_token")?.value ||
         req.cookies.get("better-auth.session_token")?.value;
 
-    if (!sessionToken) {
-        if (
-            publicRoutes.some(
-                (route) =>
-                    pathname === route || pathname.startsWith(route + "/")
-            )
-        ) {
-            return NextResponse.next();
-        }
+    if (
+        publicRoutes.some(
+            (route) => pathname === route || pathname.startsWith(route + "/")
+        )
+    ) {
+        return NextResponse.next();
+    }
 
+    if (!sessionToken) {
         if (pathname === "/seller" || pathname.startsWith("/seller")) {
             return NextResponse.redirect(
                 new URL("/seller-auth/login", req.url)

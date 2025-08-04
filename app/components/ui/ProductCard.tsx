@@ -135,7 +135,7 @@ function ProductCard({
                 <Button
                     variant="outline"
                     onClick={() => onAddToCart(id, 1, userId)}
-                    className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700 text-sm"
+                    className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700 text-sm cursor-pointer"
                 >
                     {isPending ? "Adding..." : "Add to Cart"}
                 </Button>

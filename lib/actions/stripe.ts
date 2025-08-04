@@ -7,25 +7,31 @@ export const createStripeSession = async (
     orderId: string,
     lineItems: { name: string; amount: number; quantity: number }[]
 ) => {
-    const origin = (await headers()).get("origin");
-
-    const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        payment_method_types: ["card"],
-        line_items: lineItems.map((item) => ({
-            price_data: {
-                currency: "usd",
-                product_data: { name: item.name },
-                unit_amount: item.amount
-            },
-            quantity: item.quantity
-        })),
-        metadata: {
-            orderId
+    const line_items = lineItems.map((item) => ({
+        price_data: {
+            currency: "inr",
+            product_data: { name: item.name },
+            unit_amount: item.amount
         },
-        success_url: `${origin}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/cart`
+        quantity: item.quantity
+    }));
+
+    return { line_items, orderId };
+};
+
+export async function fetchClientSecret() {
+    const origin = (await headers()).get("origin");
+    const session = await stripe.checkout.sessions.create({
+        ui_mode: "embedded",
+        line_items: [
+            {
+                price: "{{PRICE_ID}}",
+                quantity: 1
+            }
+        ],
+        mode: "payment",
+        return_url: `${origin}/return?session_id={CHECKOUT_SESSION_ID}`
     });
 
-    return session.url;
-};
+    return session.client_secret;
+}

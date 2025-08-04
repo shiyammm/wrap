@@ -30,9 +30,15 @@ const CategoryPage = async ({ params }: { params: paramsType }) => {
     return (
         <div className="container mx-auto px-4 py-10">
             {categoryName ? (
-                <h1 className="mb-6 text-3xl font-bold capitalize text-gray-800 dark:text-white">
-                    🎁 Products in {categoryName.replaceAll("-", " ")} Category
-                </h1>
+                <div className="flex flex-col justify-center items-center mb-10 mt-3 gap-2">
+                    <h1 className="text-3xl font-bold text-gray-800">
+                        🛍️ Shop products in {categoryName.replaceAll("-", " ")}{" "}
+                    </h1>
+                    <p className="text-muted-foreground text-sm">
+                        Explore our curated collection of gifts in{" "}
+                        {categoryName.replaceAll("-", " ")} category
+                    </p>
+                </div>
             ) : (
                 <h1>Category not found</h1>
             )}{" "}

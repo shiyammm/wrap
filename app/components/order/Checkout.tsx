@@ -5,6 +5,7 @@ import {
     EmbeddedCheckoutProvider
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { fetchClientSecret } from "@/lib/actions/stripe";
 
 const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -16,8 +17,7 @@ export default function Checkout() {
             <EmbeddedCheckoutProvider
                 stripe={stripePromise}
                 options={{
-                    fetchClientSecret: () =>
-                        fetch("/api/stripe-secret").then((r) => r.json())
+                    fetchClientSecret
                 }}
             >
                 <EmbeddedCheckout />

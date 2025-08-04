@@ -22,7 +22,7 @@ export function Navbar() {
                 <div className="flex items-center gap-2">
                     <Gift className="w-6 h-6 text-foreground" />
                     <Link href="/" className="font-bold text-lg">
-                        Giftly
+                        Wrap It
                     </Link>
                 </div>
 

@@ -9,10 +9,10 @@ const CategoryPage = async () => {
     <div className="container mx-auto px-4 py-16">
       {/* Page Title */}
       <div className="mb-10 text-center">
-        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
           Explore Categories
         </h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400 text-lg">
+        <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
           Discover the perfect gift across our curated collection.
         </p>
       </div>

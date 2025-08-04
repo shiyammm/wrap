@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSession, prisma } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 
 export async function GET(request: Request) {
     try {
@@ -9,21 +9,17 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "No session" }, { status: 401 });
         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { role: true }
-        });
-
-        if (!user) {
+        if (!session.user.role) {
             return NextResponse.json(
-                { error: "User not found" },
-                { status: 404 }
+                { error: "Invalid session: No role assigned" },
+                { status: 400 }
             );
         }
-        return NextResponse.json({ role: user.role });
+
+        return NextResponse.json({ role: session.user.role });
     } catch (err) {
         return NextResponse.json(
-            { error : err || "Something went wrong" },
+            { error: err || "Something went wrong" },
             { status: 500 }
         );
     }

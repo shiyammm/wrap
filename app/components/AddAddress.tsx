@@ -22,6 +22,7 @@ import {
     getAddressById,
     updateUserAddress
 } from "@/lib/actions/address.action";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type AddressFormValues = z.infer<typeof AddressSchema>;
 
@@ -102,7 +103,7 @@ const AddAddress = ({ userId, id }: { userId: string; id: string }) => {
     if (isLoading)
         return (
             <p className="text-center py-10 text-sm">
-                Getting address input...
+                <Skeleton />
             </p>
         );
 

@@ -23,7 +23,6 @@ import {
     removeCartItem,
     updateCartItem
 } from "@/lib/actions/cart.action";
-import { useSession } from "@/lib/auth-client";
 import {
     Trash2,
     Plus,
@@ -44,11 +43,18 @@ import {
     selectUserAddress
 } from "@/lib/actions/address.action";
 import { useRouter } from "next/navigation";
-import { createOrder, getOrderItemNamesById } from "@/lib/actions/order.action";
-import { createStripeSession } from "@/lib/actions/stripe";
+import { getOrderById } from "@/lib/actions/order.action";
 import { currency } from "@/constants";
 import { SkeletonCard } from "../ui/SkeletonCard";
-import { Address, CartItem, PaymentMethod, Product } from "@/prisma/generated";
+import {
+    Address,
+    CartItem,
+    OrderItem,
+    PaymentMethod,
+    Product,
+    User
+} from "@/prisma/generated";
+import { createCheckoutSession } from "@/lib/actions/checkout.action";
 
 interface ShippingMethod {
     id: string;
@@ -61,10 +67,16 @@ interface ShippingMethod {
 interface CartItemWithProduct extends CartItem {
     product: Product;
 }
+type CartProps = {
+    user: {
+        id: string;
+        email: string;
+        name: string;
+    } | null;
+};
 
-export default function Cart() {
+export default function Cart({ user }: CartProps) {
     const [items, setItems] = useState<CartItemWithProduct[] | []>([]);
-    const { data } = useSession();
     const router = useRouter();
     const paymentMethods = ["COD", "CARD"];
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
@@ -99,9 +111,9 @@ export default function Cart() {
 
     useEffect(() => {
         const fetchAddress = async () => {
-            if (!data?.user?.id) return;
+            if (!user?.id) return;
 
-            const addresses = await getUserAddresses(data.user.id);
+            const addresses = await getUserAddresses(user.id);
             setAddresses(addresses);
 
             const selected = addresses.find((addr) => addr.isSelected);
@@ -111,21 +123,21 @@ export default function Cart() {
         };
 
         fetchAddress();
-    }, [data?.user?.id]);
+    }, [user?.id]);
 
     useEffect(() => {
         const fetchCart = async () => {
-            if (!data?.user?.id) return;
+            if (!user?.id) return;
 
             setIsLoading(true);
-            const cartItem = await getCartItems(data.user.id);
+            const cartItem = await getCartItems(user.id);
             if (cartItem) {
                 setItems(cartItem);
                 setIsLoading(false);
             }
         };
         fetchCart();
-    }, [data?.user.id]);
+    }, [user?.id]);
 
     let subtotal = 0;
 
@@ -203,7 +215,7 @@ export default function Cart() {
 
     const proceedToCheckout = async () => {
         if (
-            !data?.user.id ||
+            !user?.id ||
             !selectedAddressId ||
             !paymentMethod ||
             !total ||
@@ -215,7 +227,7 @@ export default function Cart() {
         startTransition(async () => {
             try {
                 const order = await getCartProductsToMakePayment(
-                    data.user.id,
+                    user.id,
                     selectedAddressId,
                     paymentMethod,
                     total,
@@ -223,24 +235,51 @@ export default function Cart() {
                 );
 
                 if (paymentMethod === "CARD") {
-                    const orderDetails = await getOrderItemNamesById(order.id);
-                    if (orderDetails) {
-                        const sessionUrl = await createStripeSession(
-                            orderDetails.id,
-                            orderDetails.orderItems.map((item) => ({
-                                name: item.product.name,
-                                amount: item.price,
-                                quantity: item.quantity
-                            }))
-                        );
-                        router.push(`${sessionUrl}`);
+                    const metaData = {
+                        orderId: order.id,
+                        customerName: user?.name,
+                        customerEmail: user?.email,
+                        userId: user?.id
+                    };
+
+                    const orderDetails = await getOrderById(order.id);
+
+                    const response = await fetch(
+                        "/api/create-checkout-session",
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                items: orderDetails.orderItems.map(
+                                    (
+                                        item: OrderItem & { product: Product }
+                                    ) => ({
+                                        name: item.product.name,
+                                        amount: item.price,
+                                        quantity: item.quantity,
+                                        productId: item.productId,
+                                        images: item.product.images,
+                                        shippingMethod:
+                                            orderDetails.shippingMethod
+                                    })
+                                ),
+                                metaData
+                            })
+                        }
+                    );
+
+                    const result = await response.json();
+
+                    if (result.url) {
+                        router.push(result.url);
                     }
                 } else {
-                    await clearCart(data.user.id);
+                    await clearCart(user?.id);
                     setItems([]);
                     toast.success("Order placed successfully");
                     router.refresh();
                 }
+                console.log(order);
             } catch (error) {
                 toast.error("Checkout failed.");
                 console.error(error);
@@ -253,11 +292,11 @@ export default function Cart() {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-2">
                     <div>
-                        <h1 className="text-2xl font-semibold">
+                        <h1 className="text-lg font-semibold">
                             Shopping Cart{" "}
                         </h1>
                         <p
-                            className={`text-muted-foreground ${
+                            className={`text-muted-foreground text-sm ${
                                 isLoading && "hidden"
                             }`}
                         >
@@ -275,9 +314,7 @@ export default function Cart() {
                                     <div className="flex h-full flex-col md:flex-row">
                                         <div className="relative h-auto w-full md:w-32">
                                             <Image
-                                                src={
-                                                    "https://images.unsplash.com/photo-1682688759350-050208b1211c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                                }
+                                                src={item.product.images[0]}
                                                 alt={item.product.name}
                                                 width={500}
                                                 height={500}
@@ -288,13 +325,14 @@ export default function Cart() {
                                         <div className="flex-1 p-6 pb-3">
                                             <div className="flex justify-between">
                                                 <div>
-                                                    <h3 className="font-medium">
+                                                    <h3 className="font-medium  text-sm">
                                                         {item.product.name}
                                                     </h3>
                                                 </div>
                                                 <Button
                                                     variant="ghost"
-                                                    size="icon"
+                                                    size="sm"
+                                                    className="cursor-pointer"
                                                     onClick={() =>
                                                         removeItem(item.id)
                                                     }
@@ -304,10 +342,10 @@ export default function Cart() {
                                             </div>
 
                                             <div className="mt-4 flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1">
                                                     <Button
                                                         variant="outline"
-                                                        size="icon"
+                                                        size="sm"
                                                         onClick={() =>
                                                             updateQuantity(
                                                                 item.id,
@@ -383,11 +421,8 @@ export default function Cart() {
                                     <RadioGroup
                                         value={selectedAddressId}
                                         onValueChange={(id) => {
-                                            if (!data?.user?.id) return;
-                                            updateSelectedAddress(
-                                                data.user.id,
-                                                id
-                                            );
+                                            if (!user?.id) return;
+                                            updateSelectedAddress(user.id, id);
                                         }}
                                         className="space-y-4 mt-5"
                                     >

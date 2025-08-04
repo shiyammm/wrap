@@ -58,7 +58,7 @@ export function Navbar() {
                 <div className="flex items-center gap-2">
                     <Gift className="w-6 h-6 text-foreground" />
                     <Link href="/" className="font-bold text-lg">
-                        Giftly
+                        Wrap It
                     </Link>
                 </div>
 
@@ -222,15 +222,19 @@ export function Navbar() {
                                 </div>
                             </div>
                             <div className="flex justify-between items-center">
-                                <Avatar className="h-8 w-8 cursor-pointer rounded-2xl flex items-center justify-center bg-gray-100">
-                                    <div>
+                                <Avatar className="h-8 w-8 rounded-2xl flex items-center justify-center bg-gray-100">
+                                    <div className="flex gap-1 items-center">
                                         <AvatarImage
                                             src={data?.user.image || ""}
                                             alt={data?.user.name || "User"}
                                             onClick={() =>
                                                 router.push("/profile")
                                             }
+                                            className="rounded-full size-10"
                                         />
+                                        <p className="font-medium text-sm text-gray-800">
+                                            {data?.user.name}
+                                        </p>
                                     </div>
                                     <AvatarFallback>
                                         {data?.user?.name
@@ -244,6 +248,7 @@ export function Navbar() {
                                         await signOut();
                                         router.push("/");
                                     }}
+                                    size={"sm"}
                                 >
                                     Logout
                                 </Button>

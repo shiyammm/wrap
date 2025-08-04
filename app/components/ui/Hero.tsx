@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ContainerTextFlipDemo } from "./Buttons/ContainerFlipDemo";
 
 export default function Hero() {
     return (
         <>
-            <div className="w-full h-[95vh] flex items-center justify-center">
+            <div className="w-full h-[95vh] flex items-center justify-center ">
                 <div className="container mx-auto px-4 py-24 md:px-6 lg:py-32 2xl:max-w-[1400px]">
                     <div className="flex justify-center">
                         <Link
@@ -32,11 +33,11 @@ export default function Hero() {
                     </div>
                     <div className="mx-auto mt-5 max-w-2xl text-center">
                         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-                            Send Love. Share Joy.
+                            Send <ContainerTextFlipDemo /> Gifts.
                         </h1>
                     </div>
                     <div className="mx-auto mt-5 max-w-3xl text-center">
-                        <p className="text-muted-foreground text-xl">
+                        <p className="text-muted-foreground text-lg">
                             Discover the perfect gift for every occasion.
                             Thoughtfully curated gift boxes, ready to delight
                             your loved ones.

@@ -38,7 +38,7 @@ const Footer = () => {
                 <div className="py-12 flex flex-col justify-start items-center">
                     {/* Logo */}
                     <div className="text-2xl font-bold text-foreground">
-                        🎁 Giftably
+                        🎁 Wrap It
                     </div>
 
                     <ul className="mt-6 flex items-center gap-4 flex-wrap justify-center">
@@ -64,7 +64,7 @@ const Footer = () => {
                             target="_blank"
                             className="hover:underline"
                         >
-                            Giftly
+                            Wrap It
                         </Link>
                         . Spread joy, one gift at a time.
                     </span>

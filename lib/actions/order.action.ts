@@ -65,8 +65,7 @@ export const createOrder = async (
     return order;
 };
 
-export const getOrderItemNamesById = async (orderId: string) => {
-    console.log(orderId);
+export const getOrderById = async (orderId: string) => {
     const order = await prisma.order.findUnique({
         where: { id: orderId },
         include: {
@@ -83,4 +82,22 @@ export const getOrderItemNamesById = async (orderId: string) => {
     }
 
     return order;
+};
+
+export const setPaymentSuccess = async (orderId: string) => {
+    const updateOrder = await prisma.order.update({
+        where: { id: orderId },
+        data: {
+            isPaid: true
+        }
+    });
+
+    if (!updateOrder) {
+        return {
+            success: false,
+            message: "Unable to update payment info. Contact support team"
+        };
+    }
+
+    return { success: true, message: "Payment updated to paid" };
 };

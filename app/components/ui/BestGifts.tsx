@@ -7,7 +7,7 @@ const BestGifts = async () => {
     const products = await getProducts();
 
     return (
-        <section className="w-full bg-gradient-to-b from-pink-50 to-white py-12">
+        <section className="w-full py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-center text-3xl font-bold tracking-tight text-rose-700 sm:text-4xl mb-10">
                     🎁 Best Seller Gifts

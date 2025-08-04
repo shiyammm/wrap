@@ -53,9 +53,7 @@ const ProfilePage = async () => {
                                         </p>
                                         <p className="text-sm">
                                             Total: {currency}
-                                            {(order.totalAmount / 100).toFixed(
-                                                2
-                                            )}
+                                            {order.totalAmount.toFixed(2)}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
                                             Status: {order.deliveryStatus}
