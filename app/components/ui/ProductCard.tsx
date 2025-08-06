@@ -178,7 +178,7 @@ function ProductCard({
                     </div>
 
                     <div className="mt-auto flex flex-col">
-                        <div className="text-lg font-bold text-wrap-orange-dull dark:text-wrap-orange-dull">
+                        <div className="text-lg font-bold text-rose-700 dark:text-rose-400">
                             {discountedPrice && (
                                 <span>
                                     {currency}
