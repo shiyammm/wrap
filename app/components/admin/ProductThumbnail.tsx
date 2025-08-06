@@ -11,10 +11,12 @@ const ProductThumbnail = ({
     images: string[];
     isOnSale: boolean;
 }) => {
-    const [thumbnail, setThumbnail] = useState<string | StaticImport>("");
+    const [thumbnail, setThumbnail] = useState<string | StaticImport>(
+        images[0]
+    );
 
     return (
-        <div className="flex gap-3 relative">
+        <div className="flex gap-3 relative h-full">
             <div className="flex flex-col gap-3">
                 {images.length > 2 ? (
                     images.map((image, index) => (
@@ -23,12 +25,6 @@ const ProductThumbnail = ({
                             onClick={() => setThumbnail(image)}
                             className="border max-w-24 border-gray-500/30 rounded overflow-hidden cursor-pointer relative"
                         >
-                            {isOnSale && (
-                                <span className="absolute top-4 left-4 z-10 rounded-full bg-gradient-to-r from-pink-500 to-red-500 px-3 py-1.5 text-xs font-bold text-white">
-                                    Sale
-                                </span>
-                            )}
-
                             <Image
                                 width={200}
                                 height={200}
@@ -42,14 +38,14 @@ const ProductThumbnail = ({
                         <Image
                             width={200}
                             height={200}
-                            src={images[0]}
+                            src={thumbnail}
                             alt={`Thumbnail 1`}
                         />
                     </div>
                 )}
             </div>
 
-            <div className="border border-gray-500/30 max-w-100 rounded overflow-hidden relative">
+            <div className="border border-gray-500/30 max-w-100 rounded overflow-hidden relative my-auto">
                 {isOnSale && (
                     <span className="absolute top-4 left-4 z-10 rounded-full bg-gradient-to-r from-pink-500 to-red-500 px-3 py-1.5 text-xs font-bold text-white">
                         Sale

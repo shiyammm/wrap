@@ -1,16 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-    Search,
-    LogIn,
-    UserPlus,
-    Gift,
-    Menu,
-    ShoppingCart
-} from "lucide-react";
+import { Gift, Menu, ShoppingCart } from "lucide-react";
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -52,12 +44,12 @@ export function Navbar() {
     }, []);
 
     return (
-        <nav className="w-full border-b py-2 bg-white sticky top-0 z-50">
+        <nav className="w-full border-b py-2 bg-white sticky top-0 z-50 ">
             <div className="flex items-center justify-between px-4 py-2 max-w-7xl mx-auto">
                 {/* Logo */}
                 <div className="flex items-center gap-2">
                     <Gift className="w-6 h-6 text-foreground" />
-                    <Link href="/" className="font-bold text-lg">
+                    <Link href="/" className={`font-bold text-lg `}>
                         Wrap It
                     </Link>
                 </div>

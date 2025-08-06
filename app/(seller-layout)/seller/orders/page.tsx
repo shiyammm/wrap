@@ -9,7 +9,7 @@ const page = async () => {
     if (!session?.user.id) return;
 
     const orders = await getSellerOrders(session.user.id);
-    console.log(orders)
+
     return (
         <div>
             <OrderList orders={orders} />

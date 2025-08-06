@@ -14,10 +14,17 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { toast } from "sonner";
 import { checkExistingUser } from "@/lib/actions/common.action";
-import {  signUp } from "@/lib/auth-client";
+import { signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { signUpForm } from "@/lib/validation";
 import { useState, useTransition } from "react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 export function SignupForm({
     className,
@@ -66,10 +73,8 @@ export function SignupForm({
                 return;
             }
 
-            console.log("entering");
 
             if (newUser.data) {
-                console.log("entering-1");
                 if (!newUser.data.user.id) return;
 
                 const updateSellerRole = await fetch("/api/set-role", {
@@ -77,7 +82,6 @@ export function SignupForm({
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ userId: newUser.data.user.id })
                 });
-                console.log("entering-2");
 
                 if (updateSellerRole) {
                     toast.success("Account created successfully!");
@@ -93,6 +97,11 @@ export function SignupForm({
         });
     };
 
+    const handleAccountSwitch = (value: "user" | "seller") => {
+        if (value === "user") router.push("/signup");
+        else router.push("/seller-auth/signup");
+    };
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <div className="text-center space-y-2">
@@ -103,9 +112,28 @@ export function SignupForm({
                     Manage your products, track orders, and grow your business
                     with Giftably.
                 </p>
-                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    Seller Account
-                </span>
+                <Select
+                    onValueChange={(val: "user" | "seller") =>
+                        handleAccountSwitch(val)
+                    }
+                >
+                    <SelectTrigger className="w-fit mx-auto text-xs border-none shadow-none bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
+                        <SelectValue
+                            placeholder={
+                                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    Seller Account
+                                </span>
+                            }
+                        />
+                    </SelectTrigger>
+                    <SelectContent className="border-none">
+                        <SelectItem value="user">
+                            <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                User Account
+                            </span>
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             <Card>
                 <CardHeader>

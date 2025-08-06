@@ -39,7 +39,7 @@ model Product {
   category        Category @relation(fields: [categoryId], references: [id])
   categoryId      String
   sellerId        String
-  seller          User     @relation(fields: [sellerId], references: [id])
+  seller          User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   basePrice       Int // In paise (₹150 = 15000)
   discountedPrice Int?
   inStock         Int
@@ -73,6 +73,8 @@ model Order {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   shippingMethod String?
+  wrappingOption String?
+  message        String?
 }
 
 model OrderItem {
@@ -81,7 +83,7 @@ model OrderItem {
   productId String
   quantity  Int
   price     Int
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
   sellerId  String
   Seller    User    @relation(fields: [sellerId], references: [id])
@@ -92,7 +94,7 @@ model CartItem {
   userId    String
   productId String
   quantity  Int
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
@@ -110,7 +112,7 @@ model Address {
   zipcode    String
   country    String
   phone      String
-  user       User    @relation(fields: [userId], references: [id])
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   Order      Order[]
   isSelected Boolean @default(false)
 }

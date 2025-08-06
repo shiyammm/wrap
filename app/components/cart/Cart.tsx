@@ -44,7 +44,7 @@ import {
 } from "@/lib/actions/address.action";
 import { useRouter } from "next/navigation";
 import { getOrderById } from "@/lib/actions/order.action";
-import { currency } from "@/constants";
+import { currency, predefinedMessages, WrappingOptions } from "@/constants";
 import { SkeletonCard } from "../ui/SkeletonCard";
 import {
     Address,
@@ -55,6 +55,8 @@ import {
     User
 } from "@/prisma/generated";
 import { createCheckoutSession } from "@/lib/actions/checkout.action";
+import clsx from "clsx";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ShippingMethod {
     id: string;
@@ -89,6 +91,11 @@ export default function Cart({ user }: CartProps) {
     const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
         null
     );
+
+    const [wrappingOption, setWrappingOption] = useState("none");
+    const showMessageBox =
+        wrappingOption === "basic" || wrappingOption === "premium";
+    const [message, setMessage] = useState("");
 
     const [shippingMethod, setShippingMethod] = useState<string>("standard");
 
@@ -153,7 +160,11 @@ export default function Cart({ user }: CartProps) {
     const shipping =
         shippingMethods.find((m) => m.id === shippingMethod)?.price || 0;
 
-    const total = subtotal + shipping;
+    const giftWrappingCost =
+        WrappingOptions.find((option) => option.id === wrappingOption)?.price ||
+        0;
+
+    const total = subtotal + shipping + giftWrappingCost;
 
     const updateQuantity = async (id: string, change: number) => {
         const item = items.find((i) => i.id === id);
@@ -219,7 +230,8 @@ export default function Cart({ user }: CartProps) {
             !selectedAddressId ||
             !paymentMethod ||
             !total ||
-            !shippingMethod
+            !shippingMethod ||
+            !wrappingOption
         ) {
             toast.error("Missing checkout information.");
             return;
@@ -231,7 +243,9 @@ export default function Cart({ user }: CartProps) {
                     selectedAddressId,
                     paymentMethod,
                     total,
-                    shippingMethod
+                    shippingMethod,
+                    wrappingOption,
+                    message
                 );
 
                 if (paymentMethod === "CARD") {
@@ -260,7 +274,9 @@ export default function Cart({ user }: CartProps) {
                                         productId: item.productId,
                                         images: item.product.images,
                                         shippingMethod:
-                                            orderDetails.shippingMethod
+                                            orderDetails.shippingMethod,
+                                        wrappingOption:
+                                            orderDetails.wrappingOption
                                     })
                                 ),
                                 metaData
@@ -279,7 +295,6 @@ export default function Cart({ user }: CartProps) {
                     toast.success("Order placed successfully");
                     router.refresh();
                 }
-                console.log(order);
             } catch (error) {
                 toast.error("Checkout failed.");
                 console.error(error);
@@ -507,7 +522,111 @@ export default function Cart({ user }: CartProps) {
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                    <div className="space-y-5">
+                                        <Label>Select Gift Wrapping</Label>
+                                        <RadioGroup
+                                            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+                                            value={wrappingOption}
+                                            onValueChange={(value) =>
+                                                setWrappingOption(value)
+                                            }
+                                        >
+                                            {WrappingOptions.map((option) => (
+                                                <div
+                                                    key={option.id}
+                                                    className={clsx(
+                                                        "relative rounded-lg overflow-hidden border transition cursor-pointer",
+                                                        option.id ==
+                                                            wrappingOption
+                                                            ? "border-pink-200 ring-2 ring-pink-200"
+                                                            : "border-muted hover:border-pink-300"
+                                                    )}
+                                                >
+                                                    <RadioGroupItem
+                                                        value={option.id}
+                                                        className={`hidden`}
+                                                        id={option.id}
+                                                    />
+                                                    <label
+                                                        htmlFor={option.id}
+                                                        className="block cursor-pointer"
+                                                    >
+                                                        <Image
+                                                            src={option.image}
+                                                            alt={option.name}
+                                                            width={300}
+                                                            height={300}
+                                                            className="w-full h-32 object-cover"
+                                                        />
+                                                        <div className="text-center py-2 text-[0.8rem] font-medium">
+                                                            {option.name}
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
 
+                                        {showMessageBox && (
+                                            <div className="space-y-2">
+                                                <Label>Gift Message</Label>
+                                                <Textarea
+                                                    placeholder="Write your personal message..."
+                                                    value={message}
+                                                    onChange={(e) =>
+                                                        setMessage(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    rows={4}
+                                                />
+
+                                                <div className="flex gap-2 flex-wrap mt-2">
+                                                    {predefinedMessages.map(
+                                                        (msg, idx) => (
+                                                            <button
+                                                                key={idx}
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setMessage(
+                                                                        msg
+                                                                    )
+                                                                }
+                                                                className="text-sm bg-muted px-3 py-1.5 rounded hover:bg-accent"
+                                                            >
+                                                                {msg}
+                                                            </button>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-2">
+                                            <Label>Gift Wrapping</Label>
+                                            <Select
+                                                value={wrappingOption}
+                                                onValueChange={(value) =>
+                                                    setWrappingOption(value)
+                                                }
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select a wrapping option" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">
+                                                        🎁 No Wrapping (Free)
+                                                    </SelectItem>
+                                                    <SelectItem value="basic">
+                                                        ✨ Basic Wrap - ₹20
+                                                    </SelectItem>
+                                                    <SelectItem value="premium">
+                                                        🌟 Premium Wrap with
+                                                        Ribbon - ₹50
+                                                    </SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
                                     <div className="space-y-2">
                                         <Label>Payment Method</Label>
                                         <Select

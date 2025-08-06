@@ -2,17 +2,42 @@ import React from "react";
 import { getSession } from "@/lib/auth";
 import AddProduct from "@/app/components/admin/AddProduct";
 import { redirect } from "next/navigation";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
 
-const page = async () => {
+type paramsType = Promise<{ id: string }>;
+
+const page = async ({ searchParams }: { searchParams: paramsType }) => {
     const session = await getSession();
 
-    if (!session?.user.id) {
-        redirect("/");
-    }
-    
+    const userId = session?.user.id || "";
+
+    if (!userId) redirect("/login");
+
+    const id = (await searchParams).id;
+
     return (
         <>
-            <AddProduct userId={session?.user.id} />
+            <div className="container max-w-3xl">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Add New Product</CardTitle>
+                        <CardDescription>
+                            Enter product details and upload images to add a new
+                            listing.
+                        </CardDescription>
+                    </CardHeader>
+
+                    <CardContent>
+                        <AddProduct userId={userId} id={id} />
+                    </CardContent>
+                </Card>
+            </div>{" "}
         </>
     );
 };

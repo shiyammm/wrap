@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ContainerTextFlipDemo } from "./Buttons/ContainerFlipDemo";
+import { getSession } from "@/lib/auth";
 
-export default function Hero() {
+export default async function Hero() {
     return (
         <>
             <div className="w-full h-[95vh] flex items-center justify-center ">

@@ -21,7 +21,9 @@ export const createOrder = async (
     addressId: string,
     paymentMethod: PaymentMethod,
     totalAmount: number,
-    shippingMethod: string
+    shippingMethod: string,
+    wrappingOption?: string,
+    message?: string
 ) => {
     const productIds = products.map((item) => item.productId);
 
@@ -48,6 +50,8 @@ export const createOrder = async (
             paymentMethod,
             shippingMethod,
             totalAmount,
+            message,
+            wrappingOption,
             orderItems: {
                 create: orderItems.map((item) => ({
                     productId: item.productId,
@@ -100,4 +104,16 @@ export const setPaymentSuccess = async (orderId: string) => {
     }
 
     return { success: true, message: "Payment updated to paid" };
+};
+
+export const deleteOrder = async (orderId: string) => {
+    const remove = await prisma.order.delete({
+        where: { id: orderId }
+    });
+
+    if (!remove) {
+        throw new Error("Unable to cancel order");
+    }
+
+    return remove;
 };

@@ -90,7 +90,9 @@ export const getCartProductsToMakePayment = async (
     addressId: string,
     paymentMethod: PaymentMethod,
     totalAmount: number,
-    shippingMethod: string
+    shippingMethod: string,
+    wrappingOption?: string,
+    message?: string
 ) => {
     const cartItems = await prisma.cartItem.findMany({
         where: { userId },
@@ -107,7 +109,9 @@ export const getCartProductsToMakePayment = async (
         addressId,
         paymentMethod,
         totalAmount,
-        shippingMethod
+        shippingMethod,
+        wrappingOption,
+        message
     );
 
     return order;
@@ -129,6 +133,7 @@ export const clearCart = async (userId: string) => {
 
 export const getProductFromCart = async (productId: string, userId: string) => {
     let product;
+
     const userCart = await prisma.cartItem.findMany({
         where: {
             userId
@@ -146,7 +151,7 @@ export const getProductFromCart = async (productId: string, userId: string) => {
         throw new Error("Failed to get product from cart");
     }
 
-    return { product: product };
+    return { product };
 };
 
 export const updateCartFromCard = async (

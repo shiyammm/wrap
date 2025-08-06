@@ -3,6 +3,7 @@
 import { prisma } from "../auth";
 import z from "zod";
 import { productSchema } from "../validation";
+type ProductFormValues = z.infer<typeof productSchema>;
 
 export const setSellerRole = async (userId: string) => {
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -10,7 +11,6 @@ export const setSellerRole = async (userId: string) => {
     if (!user) {
         throw new Error("User not found");
     }
-    console.log(user);
 
     const updated = await prisma.user.update({
         where: { id: userId },
@@ -74,24 +74,17 @@ export const addProduct = async (
         discountedPrice,
         isPublished
     } = data;
-    if (
-        !name ||
-        !description ||
-        !category ||
-        !basePrice ||
-        !discountedPrice ||
-        !inStock ||
-        !isPublished
-    ) {
-        return { success: false, error: "Missing input Details" };
-    }
-    const productBasePrice = Number(basePrice);
-    const productDiscountedPrice = Number(discountedPrice);
 
-    // const descriptionArr = description
-    //     .split("\n")
-    //     .map((line) => line.trim())
-    //     .filter((line) => line.length > 0);
+    if (
+        !name?.trim() ||
+        !description?.trim() ||
+        !category?.trim() ||
+        basePrice === undefined ||
+        discountedPrice === undefined ||
+        inStock === undefined
+    ) {
+        return { success: false, error: "Missing input details" };
+    }
 
     const categoryData = await prisma.category.findUnique({
         where: { name: category }
@@ -115,24 +108,33 @@ export const addProduct = async (
         };
     }
 
-    const product = await prisma.product.create({
-        data: {
-            categoryId: categoryData?.id,
-            description,
-            name: name,
-            images: imageUrls,
-            basePrice: productBasePrice,
-            discountedPrice: productDiscountedPrice,
-            inStock,
-            sellerId: isSeller.id
-        }
-    });
+    try {
+        const product = await prisma.product.create({
+            data: {
+                categoryId: categoryData.id,
+                description,
+                name,
+                images: imageUrls,
+                basePrice: Math.round(basePrice * 100),
+                discountedPrice: Math.round(discountedPrice * 100),
+                inStock,
+                isPublished,
+                sellerId: isSeller.id
+            }
+        });
 
-    return {
-        success: true,
-        message: "Product uploaded successfully",
-        data: product
-    };
+        return {
+            success: true,
+            message: "Product uploaded successfully",
+            data: product
+        };
+    } catch (err) {
+        console.error("Add product failed:", err);
+        return {
+            success: false,
+            error: "Something went wrong while adding the product"
+        };
+    }
 };
 
 export const getCategories = async () => {
@@ -213,4 +215,85 @@ export const getSellerOrders = async (sellerId: string) => {
     }
 
     return data;
+};
+
+export const getProductByIdToUpdate = async (productId: string) => {
+    const product = await prisma.product.findUnique({
+        where: { id: productId },
+        include: {
+            category: true
+        }
+    });
+
+    return {
+        product: {
+            ...product,
+            category: product?.category.name,
+            images: product?.images || []
+        }
+    };
+};
+
+export const updateProduct = async (
+    id: string,
+    values: ProductFormValues,
+    uploadedUrls: string[]
+) => {
+    const {
+        name,
+        description,
+        basePrice,
+        inStock,
+        discountedPrice,
+        isPublished,
+        category
+    } = values;
+
+    if (
+        !name?.trim() ||
+        !description?.trim() ||
+        !category?.trim() ||
+        basePrice === undefined ||
+        discountedPrice === undefined ||
+        inStock === undefined
+    ) {
+        return { success: false, error: "Missing input details" };
+    }
+
+    const categoryData = await prisma.category.findUnique({
+        where: { name: category }
+    });
+
+    if (!categoryData) {
+        return { success: false, error: "Invalid category selected" };
+    }
+
+    try {
+        const updated = await prisma.product.update({
+            where: { id },
+            data: {
+                name,
+                description,
+                basePrice: Math.round(basePrice * 100),
+                discountedPrice: Math.round(discountedPrice * 100),
+                inStock,
+                isPublished,
+                category: {
+                    connect: {
+                        id: categoryData.id
+                    }
+                },
+                images: uploadedUrls
+            }
+        });
+
+        return {
+            success: true,
+            message: "Product updated successfully",
+            data: updated
+        };
+    } catch (err) {
+        console.error("Error updating product:", err);
+        return { success: false, error: "Internal server error" };
+    }
 };

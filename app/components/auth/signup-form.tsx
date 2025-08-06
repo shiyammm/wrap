@@ -18,6 +18,13 @@ import { signIn, signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { signUpForm } from "@/lib/validation";
 import { useState } from "react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 export function SignupForm({
     className,
@@ -91,6 +98,11 @@ export function SignupForm({
         });
     };
 
+    const handleAccountSwitch = (value: "user" | "seller") => {
+        if (value === "user") router.push("/signup");
+        else router.push("/seller-auth/signup");
+    };
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <div className="text-center space-y-2">
@@ -101,9 +113,28 @@ export function SignupForm({
                     Discover unique gifts, manage your orders, and enjoy a
                     personalized experience.
                 </p>
-                <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    User Account
-                </span>
+                <Select
+                    onValueChange={(val: "user" | "seller") =>
+                        handleAccountSwitch(val)
+                    }
+                >
+                    <SelectTrigger className="w-fit mx-auto text-xs border-none shadow-none bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
+                        <SelectValue
+                            placeholder={
+                                <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    User Account
+                                </span>
+                            }
+                        />
+                    </SelectTrigger>
+                    <SelectContent className="border-none">
+                        <SelectItem value="seller">
+                            <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                Seller Account
+                            </span>
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             <Card>
                 <CardHeader>

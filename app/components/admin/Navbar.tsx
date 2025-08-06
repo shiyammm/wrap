@@ -21,7 +21,7 @@ export function Navbar() {
             <div className="flex items-center justify-between px-4 py-2 mx-auto">
                 <div className="flex items-center gap-2">
                     <Gift className="w-6 h-6 text-foreground" />
-                    <Link href="/" className="font-bold text-lg">
+                    <Link href="/" className="font-bold text-lg font-playwrite">
                         Wrap It
                     </Link>
                 </div>

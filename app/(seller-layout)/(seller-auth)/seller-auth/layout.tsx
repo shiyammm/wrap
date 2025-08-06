@@ -12,10 +12,12 @@ export default function SellerAuthPageLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <>
-            {" "}
-            <Toaster />
-            {children}
-        </>
+        <html>
+            <body>
+                {" "}
+                <Toaster />
+                {children}
+            </body>
+        </html>
     );
 }

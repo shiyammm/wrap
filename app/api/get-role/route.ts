@@ -4,7 +4,6 @@ import { getSession } from "@/lib/auth";
 export async function GET(request: Request) {
     try {
         const session = await getSession();
-
         if (!session || !session.user) {
             return NextResponse.json({ error: "No session" }, { status: 401 });
         }

@@ -10,6 +10,19 @@ const publicRoutes = [
     "/seller-auth/signup"
 ];
 
+const userRoutes = [
+    "/",
+    "/shop",
+    "/categories",
+    "/cart",
+    "/profile",
+    "/orders",
+    "/cancel",
+    "/add-address",
+    "/login",
+    "/signup"
+];
+
 const protectedRoutes = ["/cart", "/add-address", "/checkout", "/profile"];
 
 export const middleware = async (req: NextRequest) => {
@@ -28,15 +41,16 @@ export const middleware = async (req: NextRequest) => {
         req.cookies.get("__Secure-better-auth.session_token")?.value ||
         req.cookies.get("better-auth.session_token")?.value;
 
-    if (
-        publicRoutes.some(
-            (route) => pathname === route || pathname.startsWith(route + "/")
-        )
-    ) {
-        return NextResponse.next();
-    }
-
     if (!sessionToken) {
+        if (
+            publicRoutes.some(
+                (route) =>
+                    pathname === route || pathname.startsWith(route + "/")
+            )
+        ) {
+            return NextResponse.next();
+        }
+
         if (pathname === "/seller" || pathname.startsWith("/seller")) {
             return NextResponse.redirect(
                 new URL("/seller-auth/login", req.url)
@@ -50,34 +64,43 @@ export const middleware = async (req: NextRequest) => {
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    try {
-        const roleResponse = await fetch(new URL("/api/get-role", req.url), {
-            headers: {
-                cookie: `${
-                    req.cookies.get("__Secure-better-auth.session_token")
-                        ? "__Secure-"
-                        : ""
-                }better-auth.session_token=${sessionToken}`
-            },
-            cache: "no-store"
-        });
+    if (
+        pathname === "/" ||
+        (userRoutes.some((route) => pathname.startsWith(route)) &&
+            !pathname.startsWith("/seller"))
+    ) {
+        try {
+            const roleResponse = await fetch(
+                new URL("/api/get-role", req.url),
+                {
+                    headers: {
+                        cookie: `${
+                            req.cookies.get(
+                                "__Secure-better-auth.session_token"
+                            )
+                                ? "__Secure-"
+                                : ""
+                        }better-auth.session_token=${sessionToken}`
+                    },
+                    cache: "no-store"
+                }
+            );
 
-        const roleData = await roleResponse.json();
+            const roleData = await roleResponse.json();
 
-        if (!roleResponse.ok || !roleData.role) {
+            if (!roleResponse.ok || !roleData.role) {
+                return NextResponse.redirect(new URL("/login", req.url));
+            }
+
+            if (roleData.role === "SELLER") {
+                return NextResponse.redirect(
+                    new URL("/seller/products", req.url)
+                );
+            }
+        } catch (err) {
+            console.error("Role check failed:", err);
             return NextResponse.redirect(new URL("/login", req.url));
         }
-
-        if (roleData.role === "SELLER" && !pathname.startsWith("/seller")) {
-            return NextResponse.redirect(new URL("/seller/products", req.url));
-        }
-
-        if (roleData.role === "USER" && pathname.startsWith("/seller")) {
-            return NextResponse.redirect(new URL("/", req.url));
-        }
-    } catch (e) {
-        console.error("Role fetch failed:", e);
-        return NextResponse.redirect(new URL("/login", req.url));
     }
 
     return NextResponse.next();

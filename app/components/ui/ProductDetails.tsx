@@ -52,11 +52,20 @@ export default function ProductDetails({
     const [isPending, startTransition] = useTransition();
 
     const fetchProductFromCart = async () => {
-        if (!data?.user.id) return;
+        if (!data?.user?.id) return;
 
-        const res = await getProductFromCart(id, data.user.id);
-        if (res.product) {
-            setQuantity(res.product[0].quantity);
+        try {
+            const res = await getProductFromCart(id, data.user.id);
+            const firstProduct = res?.product?.[0];
+
+            if (firstProduct?.productId === id) {
+                setQuantity(firstProduct.quantity);
+            } else {
+                setQuantity(0);
+            }
+        } catch (err) {
+            console.error("Failed to fetch cart product", err);
+            setQuantity(0);
         }
     };
 
@@ -80,6 +89,8 @@ export default function ProductDetails({
                 if (!res) {
                     throw new Error("Failed to add item to cart");
                 }
+
+                await fetchProductFromCart();
 
                 toast.success("Item added to cart", {
                     description: "Check your cart to proceed with checkout."
@@ -121,11 +132,9 @@ export default function ProductDetails({
     };
 
     return (
-        <div className="grid w-full max-w-4xl grid-cols-1 gap-12 rounded-lg md:grid-cols-2">
+        <div className="grid w-full max-w-6xl grid-cols-1 gap-12 rounded-lg md:grid-cols-2">
             <div className="relative w-full overflow-hidden rounded-2xl p-5 dark:from-teal-950/30 dark:to-cyan-950/30">
                 <ProductThumbnail images={images} isOnSale={isOnSale} />
-
-                {/* <Image width={400} height={600} alt={name} src={images[0]} /> */}
             </div>
 
             <div className="flex flex-col gap-6">
@@ -200,7 +209,7 @@ export default function ProductDetails({
                         // onClick={() => handleSubmit(onBuyNow)}
                         // disabled={inStock === 0 || isLoading}
                     >
-                        {isPending ? "Loading..." : "Buy Now"}
+                        {"Buy Now"}
                     </Button>
                 </div>
 

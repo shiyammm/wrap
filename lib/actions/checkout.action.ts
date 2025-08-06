@@ -17,6 +17,7 @@ export const createCheckoutSession = async (
         productId: string;
         images: string[];
         shippingMethod: "STANDARD" | "EXPRESS";
+        wrappingOption: "none" | "basic" | "premium";
     }[],
     metaData: MetaData
 ) => {
@@ -28,12 +29,25 @@ export const createCheckoutSession = async (
         const customerId =
             customers.data.length > 0 ? customers.data[0].id : "";
 
+        if (items.length === 0) {
+            throw new Error("No items provided for checkout.");
+        }
         const shippingMethod = items[0].shippingMethod;
         const shippingCost = shippingMethod === "EXPRESS" ? 10000 : 5000;
 
+        const wrappingOption = items[0].wrappingOption;
+        const wrappingCost =
+            wrappingOption === "premium"
+                ? 5000
+                : wrappingOption === "basic"
+                ? 2000
+                : 0;
+
         const sessionPayload: Stripe.Checkout.SessionCreateParams = {
             metadata: {
-                ...metaData
+                ...metaData,
+                shippingMethod,
+                wrappingOption
             },
             mode: "payment",
             payment_method_types: ["card"],
@@ -44,7 +58,7 @@ export const createCheckoutSession = async (
                 .NEXT_PUBLIC_APP_URL!}/success?session_id:{CHECKOUT_SESSION_ID}&orderId=${
                 metaData.orderId
             }`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cancel`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cancel?session_id:{CHECKOUT_SESSION_ID}&orderId=${metaData.orderId}`,
             line_items: [
                 ...items.map((item) => ({
                     price_data: {
@@ -72,6 +86,21 @@ export const createCheckoutSession = async (
                             } Shipping`
                         },
                         unit_amount: shippingCost
+                    },
+                    quantity: 1
+                },
+                {
+                    price_data: {
+                        currency: "inr",
+                        product_data: {
+                            name:
+                                wrappingOption === "none"
+                                    ? "No Gift Wrapping"
+                                    : wrappingOption === "basic"
+                                    ? "Basic Gift Wrapping"
+                                    : "Premium Gift Wrapping"
+                        },
+                        unit_amount: wrappingCost
                     },
                     quantity: 1
                 }

@@ -22,9 +22,10 @@ import {
     ColumnFiltersState
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
-import { ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowUpDown, ArrowDown, ArrowUp, Pencil } from "lucide-react";
 import Image from "next/image";
 import { Category, Product, Review } from "@/prisma/generated";
+import Link from "next/link";
 
 type ExtendedProduct = Product & {
     category: Category;
@@ -178,6 +179,21 @@ export default function ProductsList({ products }: Props) {
                 </div>
             ),
             cell: ({ row }) => (row.original.isPublished ? "Yes" : "No")
+        },
+        {
+            id: "actions",
+            header: "Actions",
+            cell: ({ row }) => {
+                const product = row.original;
+                return (
+                    <Link
+                        href={`/seller/add-product?id=${product.id}`}
+                        className="text-sm text-blue-600 hover:underline flex items-center gap-2"
+                    >
+                        Edit
+                    </Link>
+                );
+            }
         }
     ];
 

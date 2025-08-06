@@ -3,23 +3,27 @@ import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { setPaymentSuccess } from "@/lib/actions/order.action";
-import { toast } from "sonner";
 import SuccessClient from "@/app/components/SuccessClient";
+import { getSession } from "@/lib/auth";
+import { clearCart } from "@/lib/actions/cart.action";
 
 type pageProps = Promise<{ orderId: string }>;
 
 const SuccessPage = async ({ searchParams }: { searchParams: pageProps }) => {
     const orderId = (await searchParams).orderId;
 
-    console.log(orderId);
+    const session = await getSession();
 
     let statusMessage = "";
     let isSuccess = false;
 
-    if (orderId) {
+    if (orderId && session?.user.id) {
         const res = await setPaymentSuccess(orderId);
+
         statusMessage = res.message;
         isSuccess = res.success;
+
+        await clearCart(session?.user.id);
     }
 
     return (

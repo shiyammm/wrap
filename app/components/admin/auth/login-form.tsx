@@ -18,6 +18,13 @@ import { signIn } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { isSeller } from "@/lib/actions/seller.action";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 
 export function LoginForm({
     className,
@@ -76,6 +83,11 @@ export function LoginForm({
         }
     };
 
+    const handleAccountSwitch = (value: "user" | "seller") => {
+        if (value === "user") router.push("/login");
+        else router.push("/seller-auth/login");
+    };
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <div className="text-center space-y-2">
@@ -86,9 +98,28 @@ export function LoginForm({
                     Log in to manage products, view orders, and grow your store
                     on Giftably.
                 </p>
-                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    Seller Account
-                </span>
+                <Select
+                    onValueChange={(val: "user" | "seller") =>
+                        handleAccountSwitch(val)
+                    }
+                >
+                    <SelectTrigger className="w-fit mx-auto text-xs border-none shadow-none bg-transparent p-0 focus:ring-0 focus:ring-offset-0">
+                        <SelectValue
+                            placeholder={
+                                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    Seller Account
+                                </span>
+                            }
+                        />
+                    </SelectTrigger>
+                    <SelectContent className="border-none">
+                        <SelectItem value="user">
+                            <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                User Account
+                            </span>
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
             <Card>
                 <CardHeader>
@@ -144,7 +175,7 @@ export function LoginForm({
                         <div className="mt-4 text-center text-sm">
                             Don&apos;t have an account?{" "}
                             <Link
-                                href="/seller/auth/signup"
+                                href="/seller-auth/signup"
                                 className="underline underline-offset-4"
                             >
                                 Sign up
