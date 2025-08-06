@@ -46,6 +46,7 @@ export default function ProductDetails({
     const isOnSale = saleInRupees !== undefined && saleInRupees < priceInRupees;
     const effectivePrice = isOnSale ? saleInRupees : priceInRupees;
     const { data } = useSession();
+    const [isLoading, setIsLoading] = useState(false);
 
     const router = useRouter();
 
@@ -131,6 +132,19 @@ export default function ProductDetails({
         }
     };
 
+    const onBuyNow = async () => {
+        try {
+            setIsLoading(true);
+            await onAddToCart(id, 1);
+            router.push("/cart");
+            setIsLoading(false);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="grid w-full max-w-6xl grid-cols-1 gap-12 rounded-lg md:grid-cols-2">
             <div className="relative w-full overflow-hidden rounded-2xl p-5 dark:from-teal-950/30 dark:to-cyan-950/30">
@@ -183,7 +197,7 @@ export default function ProductDetails({
                     {quantity && quantity > 0 ? (
                         <Button
                             variant="outline"
-                            className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700"
+                            className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-orange-50 hover:bg-wrap-orange-dull/10 hover:text-wrap-orange-dull dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700 text-sm cursor-pointer"
                         >
                             <span onClick={() => updateQuantity(id, -1)}>
                                 <Minus className="h-4 w-4" />
@@ -196,7 +210,7 @@ export default function ProductDetails({
                     ) : (
                         <Button
                             variant="outline"
-                            className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700"
+                            className="w-full border-gray-300 bg-white text-gray-800 transition-all hover:border-orange-50 hover:bg-wrap-orange-dull/10 hover:text-wrap-orange-dull dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-rose-500 dark:hover:bg-gray-700 text-sm cursor-pointer"
                             onClick={() => onAddToCart(id, 1)}
                             disabled={inStock === 0 || isPending}
                         >
@@ -205,11 +219,10 @@ export default function ProductDetails({
                     )}
 
                     <Button
-                        className="w-full bg-gradient-to-r from-rose-400 to-pink-300 text-white transition-all hover:from-rose-400 hover:to-pink-300"
-                        // onClick={() => handleSubmit(onBuyNow)}
-                        // disabled={inStock === 0 || isLoading}
+                        className="w-full bg-gradient-to-r from-wrap-orange-dull to-yellow-200 text-white transition-all hover:from-wrap-orange hover:to-yellow-500 text-sm"
+                        onClick={onBuyNow}
                     >
-                        {"Buy Now"}
+                        {isLoading ? "Loading..." : "Buy Now"}
                     </Button>
                 </div>
 

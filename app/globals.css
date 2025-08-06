@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+    --font-playwrite: playwrite, sans-serif;
+    --color-wrap-grey: oklch(0.2635 0.0103 260.7);
+    --color-wrap-grey-500: #505762;
+    --color-wrap-orange: #fd7014;
+    --color-wrap-orange-dull: #fd8f47;
+}
 
 @theme inline {
     --color-background: var(--background);

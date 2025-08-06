@@ -1,3 +1,7 @@
+import Logo from "@/public/Logo.svg";
+
+export default Logo;
+
 export const currency = process.env.NEXT_PUBLIC_CURRENCY;
 
 export const WrappingOptions = [

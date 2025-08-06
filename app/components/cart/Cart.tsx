@@ -538,8 +538,8 @@ export default function Cart({ user }: CartProps) {
                                                         "relative rounded-lg overflow-hidden border transition cursor-pointer",
                                                         option.id ==
                                                             wrappingOption
-                                                            ? "border-pink-200 ring-2 ring-pink-200"
-                                                            : "border-muted hover:border-pink-300"
+                                                            ? "border-wrap-orange-dull ring-2 ring-wrap-orange-dull"
+                                                            : "border-muted hover:border-wrap-orange"
                                                     )}
                                                 >
                                                     <RadioGroupItem

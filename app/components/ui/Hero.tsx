@@ -33,7 +33,7 @@ export default async function Hero() {
                         </Link>
                     </div>
                     <div className="mx-auto mt-5 max-w-2xl text-center">
-                        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+                        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-wrap-grey">
                             Send <ContainerTextFlipDemo /> Gifts.
                         </h1>
                     </div>
@@ -46,7 +46,12 @@ export default async function Hero() {
                     </div>
                     <div className="mt-8 flex justify-center gap-3">
                         <Link href="/shop" className="cursor-pointer">
-                            <Button size={"lg"}>Shop Now</Button>
+                            <Button
+                                size={"lg"}
+                                className="text-white bg-wrap-grey"
+                            >
+                                Shop Now
+                            </Button>
                         </Link>
                         <Link href="/categories" className="cursor-pointer">
                             <Button size={"lg"} variant={"outline"}>

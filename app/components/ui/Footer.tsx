@@ -3,6 +3,8 @@ import Link from "next/link";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 import { FaInstagram } from "react-icons/fa";
 import { FaFacebook } from "react-icons/fa";
+import Image from "next/image";
+import Logo from "@/constants";
 
 const footerLinks = [
     {
@@ -37,8 +39,9 @@ const Footer = () => {
             <div className="max-w-screen-xl mx-auto">
                 <div className="py-12 flex flex-col justify-start items-center">
                     {/* Logo */}
-                    <div className="text-2xl font-bold text-foreground">
-                        🎁 Wrap It
+                    <div className="text-2xl font-bold text-foreground font-playwrite flex items-center">
+                        <Image src={Logo} alt="logo" width={40} height={40} />
+                        Wrap It
                     </div>
 
                     <ul className="mt-6 flex items-center gap-4 flex-wrap justify-center">

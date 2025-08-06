@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import { signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Logo from "@/constants";
 
 export function Navbar() {
     const router = useRouter();
@@ -22,6 +24,7 @@ export function Navbar() {
                 <div className="flex items-center gap-2">
                     <Gift className="w-6 h-6 text-foreground" />
                     <Link href="/" className="font-bold text-lg font-playwrite">
+                        <Image src={Logo} alt="logo" width={40} height={40} />
                         Wrap It
                     </Link>
                 </div>

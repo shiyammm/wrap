@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Gift, Menu, ShoppingCart } from "lucide-react";
+import { Menu, ShoppingCart } from "lucide-react";
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -23,6 +23,8 @@ import { DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Logo from "@/constants";
 
 export function Navbar() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -48,8 +50,11 @@ export function Navbar() {
             <div className="flex items-center justify-between px-4 py-2 max-w-7xl mx-auto">
                 {/* Logo */}
                 <div className="flex items-center gap-2">
-                    <Gift className="w-6 h-6 text-foreground" />
-                    <Link href="/" className={`font-bold text-lg `}>
+                    <Link
+                        href="/"
+                        className={`font-bold text-lg font-playwrite flex items-center`}
+                    >
+                        <Image src={Logo} alt="logo" width={40} height={40} />
                         Wrap It
                     </Link>
                 </div>

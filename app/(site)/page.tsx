@@ -3,7 +3,7 @@ import React from "react";
 
 const page = () => {
     return (
-        <div  className="bg-gradient-to-b from-pink-50 to-white " >
+        <div>
             <HomePage />
         </div>
     );
