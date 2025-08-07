@@ -297,3 +297,23 @@ export const updateProduct = async (
         return { success: false, error: "Internal server error" };
     }
 };
+
+export const deleteProduct = async (productId: string, action?: boolean) => {
+    const productDetails = await prisma.product.findUnique({
+        where: { id: productId }
+    });
+
+    if (!productDetails) {
+        throw new Error("Product not found");
+    }
+
+    if (action) {
+        const deletedProduct = await prisma.product.delete({
+            where: { id: productId }
+        });
+
+        return deletedProduct;
+    }
+
+    return productDetails;
+};

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, user: updated });
     } catch (err) {
         return NextResponse.json(
-            { error: "Failed to update role" },
+            { error: `Failed to update role ${err}` },
             { status: 500 }
         );
     }

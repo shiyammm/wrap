@@ -17,13 +17,6 @@ import {
 import { productSchema } from "@/lib/validation";
 
 import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent
-} from "@/components/ui/card";
-import {
     Form,
     FormField,
     FormItem,

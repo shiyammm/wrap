@@ -21,12 +21,9 @@ export function Navbar() {
     return (
         <nav className="w-full border-b py-2 bg-white sticky top-0 z-50">
             <div className="flex items-center justify-between px-4 py-2 mx-auto">
-                <div className="flex items-center gap-2">
-                    <Gift className="w-6 h-6 text-foreground" />
-                    <Link href="/" className="font-bold text-lg font-playwrite">
-                        <Image src={Logo} alt="logo" width={40} height={40} />
-                        Wrap It
-                    </Link>
+                <div className="flex items-center font-playwrite">
+                    <Image src={Logo} alt="logo" width={40} height={40} />
+                    Wrap It
                 </div>
 
                 <div className="flex-1 mx-8 flex items-center gap-4">
