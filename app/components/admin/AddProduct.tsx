@@ -35,7 +35,7 @@ import { SkeletonCard } from "../ui/SkeletonCard";
 type ProductFormValues = z.infer<typeof productSchema>;
 
 const AddProduct = ({ userId, id }: { userId: string; id: string }) => {
-    const [isPending, startTransition] = useTransition();
+    const [isPending, setIsPending] = useState(false);
     const [images, setImages] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const router = useRouter();
@@ -85,45 +85,47 @@ const AddProduct = ({ userId, id }: { userId: string; id: string }) => {
             return;
         }
 
-        startTransition(async () => {
-            try {
-                const uploadedUrls: string[] = [...existingImageUrls];
+        try {
+            setIsPending(true);
 
-                await Promise.all(
-                    images.map(async (file) => {
-                        const { signature, expire, token, publicKey } =
-                            await authenticator();
-                        const imageData = await upload({
-                            file,
-                            fileName: file.name,
-                            expire,
-                            token,
-                            signature,
-                            publicKey
-                        });
-                        if (imageData?.url) uploadedUrls.push(imageData.url);
-                    })
-                );
+            const uploadedUrls: string[] = [...existingImageUrls];
 
-                let res;
-                if (productId) {
-                    res = await updateProduct(productId, values, uploadedUrls);
-                    toast.success("Product updated successfully");
-                } else {
-                    res = await addProduct(values, userId, uploadedUrls);
-                    toast.success("Product added successfully");
-                }
+            await Promise.all(
+                images.map(async (file) => {
+                    const { signature, expire, token, publicKey } =
+                        await authenticator();
+                    const imageData = await upload({
+                        file,
+                        fileName: file.name,
+                        expire,
+                        token,
+                        signature,
+                        publicKey
+                    });
+                    if (imageData?.url) uploadedUrls.push(imageData.url);
+                })
+            );
 
-                if (res) {
-                    router.push("/seller/products");
-                } else {
-                    toast.error("Failed to save product");
-                }
-            } catch (error) {
-                toast.error("Unexpected error. Please try again later.");
-                console.error(error);
+            let res;
+            if (productId) {
+                res = await updateProduct(productId, values, uploadedUrls);
+                toast.success("Product updated successfully");
+            } else {
+                res = await addProduct(values, userId, uploadedUrls);
+                toast.success("Product added successfully");
             }
-        });
+
+            if (res) {
+                router.push("/seller/products");
+            } else {
+                toast.error("Failed to save product");
+            }
+        } catch (error) {
+            toast.error("Unexpected error. Please try again later.");
+            console.error(error);
+        } finally {
+            setIsPending(false);
+        }
     };
 
     useEffect(() => {
@@ -191,16 +193,82 @@ const AddProduct = ({ userId, id }: { userId: string; id: string }) => {
                     >
                         <FormItem>
                             <FormLabel>Product Images</FormLabel>
-                            <div className="flex gap-3 mt-2 flex-wrap">
-                                {[...Array(4)].map((_, index) => (
-                                    <label
-                                        key={index}
-                                        htmlFor={`image-${index}`}
-                                    >
+                            <div className="flex flex-wrap gap-3 mt-2">
+                                {existingImageUrls.map((url, index) => (
+                                    <div key={index} className="relative">
+                                        <Image
+                                            src={url}
+                                            alt={`Existing Preview ${index}`}
+                                            width={100}
+                                            height={100}
+                                            className="rounded border"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setExistingImageUrls((prev) =>
+                                                    prev.filter(
+                                                        (_, i) => i !== index
+                                                    )
+                                                );
+                                                setPreviewUrls((prev) =>
+                                                    prev.filter(
+                                                        (u) => u !== url
+                                                    )
+                                                );
+                                            }}
+                                            className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 text-xs"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {previewUrls
+                                    .slice(existingImageUrls.length)
+                                    .map((url, index) => (
+                                        <div
+                                            key={`new-${index}`}
+                                            className="relative"
+                                        >
+                                            <Image
+                                                src={url}
+                                                alt={`New Preview ${index}`}
+                                                width={100}
+                                                height={100}
+                                                className="rounded border"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newPreview = [
+                                                        ...previewUrls
+                                                    ];
+                                                    const newImages = [
+                                                        ...images
+                                                    ];
+                                                    newPreview.splice(
+                                                        existingImageUrls.length +
+                                                            index,
+                                                        1
+                                                    );
+                                                    newImages.splice(index, 1);
+                                                    setPreviewUrls(newPreview);
+                                                    setImages(newImages);
+                                                }}
+                                                className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 text-xs"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                {previewUrls.length < 4 && (
+                                    <label htmlFor="image-upload">
                                         <input
+                                            id="image-upload"
                                             type="file"
                                             accept="image/*"
-                                            id={`image-${index}`}
                                             hidden
                                             multiple
                                             onChange={(e) =>
@@ -210,17 +278,14 @@ const AddProduct = ({ userId, id }: { userId: string; id: string }) => {
                                             }
                                         />
                                         <Image
-                                            src={
-                                                previewUrls[index] ||
-                                                imagePlaceholder
-                                            }
-                                            alt="Preview"
+                                            src={imagePlaceholder}
+                                            alt="Upload"
                                             width={100}
                                             height={100}
                                             className="rounded border cursor-pointer"
                                         />
                                     </label>
-                                ))}
+                                )}
                             </div>
                         </FormItem>
 
