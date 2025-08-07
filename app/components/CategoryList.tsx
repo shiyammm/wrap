@@ -1,0 +1,71 @@
+"use client";
+
+import React from "react";
+import { Category } from "@/prisma/generated";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
+
+type Props = {
+    categories: Category[];
+    category: string;
+};
+
+const CategoryList = ({ categories, category }: Props) => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const handleCategoryClick = (cat: string) => {
+        const params = new URLSearchParams(searchParams);
+        params.set("category", cat);
+        router.push(`/shop?${params.toString()}`);
+    };
+
+    return (
+        <div className="flex flex-wrap gap-2 mb-5">
+            <Badge
+                variant={
+                    category?.toLowerCase() === "all" ? "default" : "outline"
+                }
+                className={cn(
+                    "cursor-pointer transition py-1 text-sm",
+                    category?.toLowerCase() === "all"
+                        ? "bg-black text-white hover:bg-black"
+                        : ""
+                )}
+                onClick={() => handleCategoryClick("all")}
+            >
+                All
+            </Badge>
+
+            {categories.length > 0 ? (
+                categories.map((cat) => {
+                    const isActive =
+                        category?.toLowerCase() === cat.name.toLowerCase();
+
+                    return (
+                        <Badge
+                            key={cat.id}
+                            variant={isActive ? "default" : "outline"}
+                            className={cn(
+                                "cursor-pointer transition py-1 text-sm",
+                                isActive
+                                    ? "bg-black text-white hover:bg-black"
+                                    : ""
+                            )}
+                            onClick={() => handleCategoryClick(cat.name)}
+                        >
+                            {cat.name}
+                        </Badge>
+                    );
+                })
+            ) : (
+                <span className="text-sm text-muted-foreground">
+                    No categories found
+                </span>
+            )}
+        </div>
+    );
+};
+
+export default CategoryList;

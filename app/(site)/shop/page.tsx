@@ -1,11 +1,16 @@
 import React from "react";
-import { searchProductsByName } from "@/lib/actions/products.action";
+import {
+    getAllCategoriesNames,
+    getProductByParams
+} from "@/lib/actions/products.action";
 import ProductCard from "@/app/components/ui/ProductCard";
 import { PaginationDemo } from "../../components/Pagination";
+import CategoryList from "@/app/components/CategoryList";
 
 interface ShopPageProps {
     search?: string;
     page?: string;
+    category?: string;
 }
 
 const ShopPage = async ({
@@ -14,15 +19,18 @@ const ShopPage = async ({
     searchParams: Promise<ShopPageProps>;
 }) => {
     const search = (await searchParams).search || "";
+    const category = (await searchParams).category || "all";
     const currentPage = Number((await searchParams).page) || 1;
     const limit = 8;
 
-    const { products, totalCount } = await searchProductsByName(
+    const { products, totalCount } = await getProductByParams(
         search,
         currentPage,
-        limit
+        limit,
+        category
     );
 
+    const categories = await getAllCategoriesNames();
     const totalPages = Math.ceil(totalCount / limit);
 
     return (
@@ -37,6 +45,7 @@ const ShopPage = async ({
                         occasion.
                     </p>
                 </div>
+                <CategoryList categories={categories} category={category} />
                 <div className="w-full bg-gradient-to-b from-pink-50 to-white py-5 rounded-xl">
                     {products.length > 0 ? (
                         <>

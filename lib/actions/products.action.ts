@@ -94,25 +94,33 @@ export const getCategoryName = async (categoryId: string) => {
     return category.name;
 };
 
-export const searchProductsByName = async (
+export const getProductByParams = async (
     name: string,
     page: number = 1,
-    limit: number = 8
+    limit: number = 8,
+    category: string
 ) => {
     try {
         const skip = (page - 1) * limit;
 
-        const whereClause = {
-            name: name
-                ? {
-                      contains: name,
-                      mode: Prisma.QueryMode.insensitive
-                  }
-                : undefined,
+        const whereClause: Prisma.ProductWhereInput = {
+            name: {
+                contains: name,
+                mode: "insensitive"
+            },
             inStock: {
                 gt: 0
             }
         };
+
+        if (category && category.toLowerCase() !== "all") {
+            whereClause.category = {
+                name: {
+                    equals: category,
+                    mode: "insensitive"
+                }
+            };
+        }
 
         const [products, totalCount] = await Promise.all([
             prisma.product.findMany({

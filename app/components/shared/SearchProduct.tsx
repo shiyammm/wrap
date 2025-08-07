@@ -13,11 +13,12 @@ const SearchProduct = () => {
     );
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
+        const value = e.target.value.trim();
         setSearchTerm(value);
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(searchParams);
         if (value) {
             params.set("search", value);
+            params.set("page", (1).toString());
         } else {
             params.delete("search");
         }

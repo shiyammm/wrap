@@ -7,13 +7,6 @@ import {
     SelectValue
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { createCategory, getCategories } from "@/lib/actions/seller.action";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +14,7 @@ import { Category } from "@/prisma/generated";
 import { ControllerRenderProps } from "react-hook-form";
 import { productSchema } from "@/lib/validation";
 import z from "zod";
+import AddCategory from "./AddCategory";
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
@@ -92,24 +86,14 @@ export const CategorySelect = ({ field }: Props) => {
                     </div>
                 </SelectContent>
             </Select>
-
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Add New Category</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-3">
-                        <Input
-                            placeholder="Enter category name"
-                            value={newCategory}
-                            onChange={(e) => setNewCategory(e.target.value)}
-                        />
-                        <Button onClick={handleAddCategory}>
-                            {isPending ? "Creating..." : "Create"}
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <AddCategory
+                open={open}
+                handleAddCategory={handleAddCategory}
+                isPending={isPending}
+                newCategory={newCategory}
+                setNewCategory={setNewCategory}
+                setOpen={setOpen}
+            />
         </>
     );
 };
