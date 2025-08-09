@@ -9,11 +9,9 @@ import PaymentOption from "../cart/PaymentOption";
 import Subtotal from "../cart/Subtotal";
 import useOrder from "@/hooks/use-order";
 import { useSession } from "@/lib/auth-client";
-import { Category, Product, Role, User } from "@/prisma/generated";
+import { Product, } from "@/prisma/generated";
 import { useCheckout } from "@/hooks/use-checkout";
 import { currency, WrappingOptions } from "@/constants";
-import { getProductById } from "@/lib/actions/products.action";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Minus, Plus } from "lucide-react";
@@ -51,7 +49,6 @@ const BuySheet = ({
     discountedPrice: number;
     inStock: number;
 }) => {
-    const { data } = useSession();
     const [items, setItems] = useState<ItemsState[] | []>([]);
     const [quantity, setQuantity] = useState(1);
 

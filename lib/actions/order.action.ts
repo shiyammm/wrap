@@ -1,6 +1,6 @@
 "use server";
 
-import { CartItem, Category, PaymentMethod, Product } from "@/prisma/generated";
+import { PaymentMethod } from "@/prisma/generated";
 import { prisma } from "../auth";
 
 type OrderProductInput = {
@@ -35,7 +35,7 @@ export const createOrder = async (
     totalAmount: number,
     shippingMethod: string,
     wrappingOption?: string,
-    message?: string,
+    message?: string
 ) => {
     const productIds = products.map((item) => item.productId);
 

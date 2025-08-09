@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import {
     getCartItems,
     removeCartItem,
@@ -22,13 +21,10 @@ import {
     CreditCard,
     Truck,
     Shield,
-    PlusCircle
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import Link from "next/link";
 import { currency, WrappingOptions } from "@/constants";
 import { SkeletonCard } from "../ui/SkeletonCard";
 import { CartItem, Product, User } from "@/prisma/generated";

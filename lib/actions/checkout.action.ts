@@ -1,4 +1,3 @@
-import { Order, OrderItem, Product } from "@/prisma/generated";
 import { stripe } from "../stripe/stripe";
 import Stripe from "stripe";
 

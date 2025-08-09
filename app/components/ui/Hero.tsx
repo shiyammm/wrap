@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ContainerTextFlipDemo } from "./Buttons/ContainerFlipDemo";
-import { getSession } from "@/lib/auth";
 
 export default async function Hero() {
     return (

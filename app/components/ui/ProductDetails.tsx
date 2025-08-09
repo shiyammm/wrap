@@ -18,16 +18,16 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import BuySheet from "../buy/BuySheet";
 
-interface AddToCartPayload {
-    productId: string;
-    productName: string;
-    quantity: number;
-    price: number;
-    originalPrice?: number;
-    salePrice?: number;
-    totalPrice: number;
-    isOnSale: boolean;
-}
+// interface AddToCartPayload {
+//     productId: string;
+//     productName: string;
+//     quantity: number;
+//     price: number;
+//     originalPrice?: number;
+//     salePrice?: number;
+//     totalPrice: number;
+//     isOnSale: boolean;
+// }
 
 export default function ProductDetails({
     id,
@@ -51,7 +51,7 @@ export default function ProductDetails({
     const isOnSale = saleInRupees !== undefined && saleInRupees < priceInRupees;
     const effectivePrice = isOnSale ? saleInRupees : priceInRupees;
     const { data } = useSession();
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
     const [openBuyNow, setOpenBuyNow] = useState(false);
 
     const router = useRouter();
@@ -237,7 +237,7 @@ export default function ProductDetails({
                                 className="w-full bg-gradient-to-r from-wrap-orange-dull to-yellow-200 text-white transition-all hover:from-wrap-orange hover:to-yellow-500 text-sm cursor-pointer"
                                 onClick={onBuyNow}
                             >
-                                {isLoading ? "Loading..." : "Buy Now"}
+                                {"Buy Now"}
                             </Button>
                         </div>
 
