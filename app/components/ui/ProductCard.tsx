@@ -95,6 +95,9 @@ function ProductCard({
     };
 
     const onBuyNow = async () => {
+        if (!data?.user.id) {
+            toast.error("You must be logged in buy products");
+        }
         try {
             setOpenBuyNow(true);
         } catch (error) {
@@ -226,7 +229,7 @@ function ProductCard({
                     )}
                     <Button
                         onClick={onBuyNow}
-                        className="w-full bg-gradient-to-r from-wrap-orange-dull to-yellow-200 text-white transition-all hover:from-wrap-orange hover:to-yellow-500 text-sm"
+                        className="w-full cursor-pointer bg-gradient-to-r from-wrap-orange-dull to-yellow-200 text-white transition-all hover:from-wrap-orange hover:to-yellow-500 text-sm"
                     >
                         {"Buy Now"}
                     </Button>

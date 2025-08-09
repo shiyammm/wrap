@@ -68,7 +68,13 @@ export function Navbar() {
                         href="/"
                         className={`font-bold text-lg font-playwrite flex items-center`}
                     >
-                        <Image src={Logo} alt="logo" width={40} height={40} />
+                        <Image
+                            src={Logo}
+                            alt="logo"
+                            width={40}
+                            height={40}
+                            className="pb-1.5"
+                        />
                         Wrap It
                     </Link>
                 </div>
