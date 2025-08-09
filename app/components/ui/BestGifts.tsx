@@ -2,6 +2,8 @@ import React from "react";
 import ProductCard from "./ProductCard";
 import { getProducts } from "@/lib/actions/products.action";
 import { SkeletonCard } from "./SkeletonCard";
+import BestSellerIcon from "@/public/bage.svg";
+import Image from "next/image";
 
 const BestGifts = async () => {
     const products = await getProducts();
@@ -9,9 +11,15 @@ const BestGifts = async () => {
     return (
         <section className="w-full py-12">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-center text-2xl font-bold tracking-tight text-wrap-grey sm:text-4xl mb-10">
-                    Best Seller Gifts
-                </h2>
+                <div className="text-center text-2xl font-bold tracking-tight text-wrap-grey sm:text-4xl mb-10 flex justify-center gap-1">
+                    <Image
+                        src={BestSellerIcon}
+                        width={35}
+                        height={35}
+                        alt="Best seller icon"
+                    />
+                    <h1>Best Seller Gifts</h1>
+                </div>
 
                 <div className="flex flex-wrap gap-6 justify-center">
                     {products.length > 0

@@ -34,7 +34,7 @@ export default function SellerPageLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} ${playwrite.variable} antialiased`}
             >
-                <Toaster />
+                <Toaster position="top-center" />
                 <div className="">
                     <Navbar />
                     <SellerLayout>{children}</SellerLayout>

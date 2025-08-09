@@ -1,11 +1,23 @@
 "use server";
 
-import { CartItem, PaymentMethod } from "@/prisma/generated";
+import { CartItem, Category, PaymentMethod, Product } from "@/prisma/generated";
 import { prisma } from "../auth";
+
+type OrderProductInput = {
+    productId: string;
+    quantity: number;
+};
 
 export const getUserOrders = async (userId: string) => {
     const orders = await prisma.order.findMany({
-        where: { userId }
+        where: { userId },
+        include: {
+            orderItems: {
+                include: {
+                    product: true
+                }
+            }
+        }
     });
 
     if (!orders) {
@@ -16,14 +28,14 @@ export const getUserOrders = async (userId: string) => {
 };
 
 export const createOrder = async (
-    products: CartItem[],
+    products: OrderProductInput[],
     userId: string,
     addressId: string,
     paymentMethod: PaymentMethod,
     totalAmount: number,
     shippingMethod: string,
     wrappingOption?: string,
-    message?: string
+    message?: string,
 ) => {
     const productIds = products.map((item) => item.productId);
 

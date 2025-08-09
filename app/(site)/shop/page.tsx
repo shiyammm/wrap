@@ -49,7 +49,7 @@ const ShopPage = async ({
                 <div className="w-full bg-gradient-to-b from-pink-50 to-white py-5 rounded-xl">
                     {products.length > 0 ? (
                         <>
-                            <div className="flex flex-wrap justify-center gap-6">
+                            <div className="grid md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 px-4">
                                 {products.map((product) => (
                                     <ProductCard
                                         key={product.id}

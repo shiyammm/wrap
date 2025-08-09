@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-import { Address, Order, Product, Review } from "@/prisma/generated";
+import { Address, Order, OrderItem, Product, Review } from "@/prisma/generated";
 
 const ProfilePage = async () => {
     const session = await getSession();
@@ -26,7 +26,7 @@ const ProfilePage = async () => {
     ]);
 
     return (
-        <div className="container mx-auto py-10 px-4 space-y-8">
+        <div className="container mx-auto py-10 px-4 space-y-8 max-w-7xl">
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Left Side: Orders & Reviews */}
                 <div className="flex-1 space-y-6">
@@ -43,23 +43,59 @@ const ProfilePage = async () => {
                                     No orders found.
                                 </p>
                             ) : (
-                                orders.map((order: Order) => (
-                                    <div
-                                        key={order.id}
-                                        className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition"
-                                    >
-                                        <p className="font-medium">
-                                            Order #{order.id}
-                                        </p>
-                                        <p className="text-sm">
-                                            Total: {currency}
-                                            {order.totalAmount.toFixed(2)}
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Status: {order.deliveryStatus}
-                                        </p>
-                                    </div>
-                                ))
+                                orders.map(
+                                    (
+                                        order: Order & {
+                                            orderItems: (OrderItem & {
+                                                product: Product;
+                                            })[];
+                                        }
+                                    ) => (
+                                        <div
+                                            key={order.id}
+                                            className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition"
+                                        >
+                                            <p className="font-medium">
+                                                Order #{order.id}
+                                            </p>
+                                            <p className="text-sm">
+                                                Total: {currency}
+                                                {order.totalAmount.toFixed(2)}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                Status: {order.deliveryStatus}
+                                            </p>
+
+                                            <div className="mt-3 space-y-2">
+                                                {order.orderItems.map(
+                                                    (item) => (
+                                                        <div
+                                                            key={item.id}
+                                                            className="flex justify-between text-sm"
+                                                        >
+                                                            <span>
+                                                                {item.product
+                                                                    ?.name ||
+                                                                    "Unknown Product"}
+                                                            </span>
+                                                            <span>
+                                                                {currency}
+                                                                {(
+                                                                    item.price /
+                                                                    100
+                                                                ).toFixed(
+                                                                    2
+                                                                )}{" "}
+                                                                ×{" "}
+                                                                {item.quantity}
+                                                            </span>
+                                                        </div>
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    )
+                                )
                             )}
                         </CardContent>
                     </Card>

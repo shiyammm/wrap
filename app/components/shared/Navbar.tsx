@@ -25,11 +25,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Logo from "@/constants";
+import { getCartItems } from "@/lib/actions/cart.action";
+import { Badge } from "@/components/ui/badge";
 
 export function Navbar() {
     const [categories, setCategories] = useState<Category[]>([]);
     const { data } = useSession();
     const router = useRouter();
+    const [cartCount, setCartCount] = useState(0);
 
     const user = data?.user.id;
 
@@ -44,6 +47,17 @@ export function Navbar() {
         };
         fetchCategories();
     }, []);
+
+    useEffect(() => {
+        const fetCartCount = async () => {
+            if (!user) return;
+
+            const count = (await getCartItems(user)).length;
+            setCartCount(count);
+        };
+
+        fetCartCount();
+    }, [user]);
 
     return (
         <nav className="w-full border-b py-2 bg-white sticky top-0 z-50 ">
@@ -154,9 +168,17 @@ export function Navbar() {
                     </Suspense>
                     {user && (
                         <Button variant="outline" asChild>
-                            <Link href="/cart">
+                            <Link
+                                href="/cart"
+                                className="relative inline-flex items-center"
+                            >
                                 <ShoppingCart className="w-4 h-4 mr-1" />
-                                Cart
+                                {cartCount > 0 && (
+                                    <Badge className="absolute -top-2 -right-2 px-1.5 py-0 text-xs rounded-full">
+                                        {cartCount}
+                                    </Badge>
+                                )}
+                                {/* <span className="ml-1">Cart</span> */}
                             </Link>
                         </Button>
                     )}
@@ -165,9 +187,20 @@ export function Navbar() {
                 {/* Mobile Nav */}
                 <div className="md:hidden flex items-center gap-2">
                     {user && (
-                        <Link href="/cart">
-                            <ShoppingCart className="w-5 h-5" />
-                        </Link>
+                        <Button variant="outline" asChild>
+                            <Link
+                                href="/cart"
+                                className="relative inline-flex items-center"
+                            >
+                                <ShoppingCart className="w-4 h-4 mr-1" />
+                                {cartCount > 0 && (
+                                    <Badge className="absolute -top-2 -right-2 px-1.5 py-0 text-xs rounded-full">
+                                        {cartCount}
+                                    </Badge>
+                                )}
+                                {/* <span className="ml-1">Cart</span> */}
+                            </Link>
+                        </Button>
                     )}
                     <Sheet>
                         <VisuallyHidden>

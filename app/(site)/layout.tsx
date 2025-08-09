@@ -35,7 +35,7 @@ export default function RootLayout({
             className={`${geistSans.variable} ${geistMono.variable} ${playwrite.variable}`}
         >
             <body>
-                <Toaster />
+                <Toaster position="top-center" />
                 <Navbar />
                 {children}
                 <Footer />

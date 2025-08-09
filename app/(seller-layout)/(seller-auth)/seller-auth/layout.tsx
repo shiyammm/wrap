@@ -15,7 +15,7 @@ export default function SellerAuthPageLayout({
         <html>
             <body>
                 {" "}
-                <Toaster />
+                <Toaster position="top-center" />
                 {children}
             </body>
         </html>

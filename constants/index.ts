@@ -4,6 +4,14 @@ export default Logo;
 
 export const currency = process.env.NEXT_PUBLIC_CURRENCY;
 
+interface ShippingMethod {
+    id: string;
+    name: string;
+    price: number;
+    estimatedDays: string;
+    description: string;
+}
+
 export const WrappingOptions = [
     {
         id: "none",
@@ -29,4 +37,23 @@ export const predefinedMessages = [
     "Happy Birthday! 🎂",
     "Congratulations on your special day! 🎉",
     "Sending you love and warm wishes 💝"
+];
+
+export const paymentMethods = ["COD", "CARD"];
+
+export const shippingMethods: ShippingMethod[] = [
+    {
+        id: "standard",
+        name: "Standard Shipping",
+        price: 50,
+        estimatedDays: "3-5 days",
+        description: `Free shipping on orders over ${currency}500`
+    },
+    {
+        id: "express",
+        name: "Express Shipping",
+        price: 100,
+        estimatedDays: "1-2 days",
+        description: "Priority delivery with tracking"
+    }
 ];
