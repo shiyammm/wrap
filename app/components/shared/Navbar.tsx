@@ -278,16 +278,30 @@ export function Navbar() {
                                             .toUpperCase() || "U"}
                                     </AvatarFallback>
                                 </Avatar>
-                                <Button
-                                    variant={"secondary"}
-                                    onClick={async () => {
-                                        await signOut();
-                                        router.push("/");
-                                    }}
-                                    size={"sm"}
-                                >
-                                    Logout
-                                </Button>
+                                {user ? (
+                                    <>
+                                        <Button
+                                            variant={"secondary"}
+                                            onClick={async () => {
+                                                await signOut();
+                                                router.push("/");
+                                            }}
+                                            size={"sm"}
+                                        >
+                                            Logout
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button
+                                            variant="default"
+                                            size="sm"
+                                            asChild
+                                        >
+                                            <Link href="/login">Login</Link>
+                                        </Button>
+                                    </>
+                                )}
                             </div>
                         </SheetContent>
                     </Sheet>
