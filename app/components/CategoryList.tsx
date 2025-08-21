@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 type Props = {
     categories: Category[];
-    category: string;
+    category: string[];
 };
 
 const CategoryList = ({ categories, category }: Props) => {
@@ -17,19 +17,33 @@ const CategoryList = ({ categories, category }: Props) => {
 
     const handleCategoryClick = (cat: string) => {
         const params = new URLSearchParams(searchParams);
-        params.set("category", cat);
+        const selected = category.includes(cat);
+
+        let updatedCategories = [...category];
+        if (cat === "all") {
+            updatedCategories = [];
+        } else if (selected) {
+            updatedCategories = updatedCategories.filter((c) => c !== cat);
+        } else {
+            updatedCategories.push(cat);
+        }
+
+        if (updatedCategories.length === 0) {
+            params.delete("category");
+        } else {
+            params.set("category", updatedCategories.join(","));
+        }
+
         router.push(`/shop?${params.toString()}`);
     };
 
     return (
         <div className="flex flex-wrap gap-2 mb-5">
             <Badge
-                variant={
-                    category?.toLowerCase() === "all" ? "default" : "outline"
-                }
+                variant={category.length === 0 ? "default" : "outline"}
                 className={cn(
                     "cursor-pointer transition py-1 text-sm",
-                    category?.toLowerCase() === "all"
+                    category.length === 0
                         ? "bg-black text-white hover:bg-black"
                         : ""
                 )}
@@ -40,8 +54,7 @@ const CategoryList = ({ categories, category }: Props) => {
 
             {categories.length > 0 ? (
                 categories.map((cat) => {
-                    const isActive =
-                        category?.toLowerCase() === cat.name.toLowerCase();
+                    const isActive = category.includes(cat.name);
 
                     return (
                         <Badge

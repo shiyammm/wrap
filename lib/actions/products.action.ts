@@ -102,7 +102,7 @@ export const getProductByParams = async (
     name: string,
     page: number = 1,
     limit: number = 8,
-    category: string
+    categories: string[]
 ) => {
     try {
         const skip = (page - 1) * limit;
@@ -117,10 +117,10 @@ export const getProductByParams = async (
             }
         };
 
-        if (category && category.toLowerCase() !== "all") {
+        if (categories.length > 0) {
             whereClause.category = {
                 name: {
-                    equals: category,
+                    in: categories,
                     mode: "insensitive"
                 }
             };

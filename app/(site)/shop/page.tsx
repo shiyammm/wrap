@@ -19,7 +19,8 @@ const ShopPage = async ({
     searchParams: Promise<ShopPageProps>;
 }) => {
     const search = (await searchParams).search || "";
-    const category = (await searchParams).category || "all";
+    const categoryParam = (await searchParams).category || "";
+    const category = categoryParam === "" ? [] : categoryParam.split(",");
     const currentPage = Number((await searchParams).page) || 1;
     const limit = 8;
 
